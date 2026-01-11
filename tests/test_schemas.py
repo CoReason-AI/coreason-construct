@@ -1,5 +1,5 @@
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
 
@@ -29,6 +29,18 @@ def test_prompt_component_defaults() -> None:
     assert component.priority == 1
 
 
+def test_prompt_component_priority_validation() -> None:
+    # Valid boundaries
+    PromptComponent(name="Test", type=ComponentType.ROLE, content="", priority=1)
+    PromptComponent(name="Test", type=ComponentType.ROLE, content="", priority=10)
+
+    # Invalid boundaries
+    with pytest.raises(ValidationError):
+        PromptComponent(name="Test", type=ComponentType.ROLE, content="", priority=0)
+    with pytest.raises(ValidationError):
+        PromptComponent(name="Test", type=ComponentType.ROLE, content="", priority=11)
+
+
 def test_prompt_component_render() -> None:
     component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
     rendered = component.render(role="Doctor")
@@ -39,6 +51,34 @@ def test_prompt_component_render_missing_kwargs() -> None:
     component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
     with pytest.raises(KeyError):
         component.render()
+
+
+def test_prompt_component_render_extra_kwargs() -> None:
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
+    rendered = component.render(role="Doctor", extra="Ignored")
+    assert rendered == "You are a Doctor."
+
+
+def test_prompt_component_render_complex_types() -> None:
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="Value: {val}")
+    # Integer
+    assert component.render(val=123) == "Value: 123"
+    # Object
+    obj = object()
+    assert component.render(val=obj) == f"Value: {str(obj)}"
+
+
+def test_prompt_component_render_escaped_braces() -> None:
+    component = PromptComponent(name="TestJSON", type=ComponentType.DATA, content='JSON: {{ "key": "{val}" }}')
+    rendered = component.render(val="value")
+    assert rendered == 'JSON: { "key": "value" }'
+
+
+def test_prompt_component_render_malformed() -> None:
+    # Unmatched brace
+    component = PromptComponent(name="TestBad", type=ComponentType.ROLE, content="Hello {world")
+    with pytest.raises(ValueError):
+        component.render(world="Earth")
 
 
 def test_prompt_configuration_creation() -> None:
@@ -57,3 +97,11 @@ def test_prompt_configuration_optional_model() -> None:
         system_message="System", user_message="User", response_model=None, provenance_metadata={}
     )
     assert config.response_model is None
+
+
+def test_prompt_configuration_validation() -> None:
+    # Invalid max_retries (negative)
+    with pytest.raises(ValidationError):
+        PromptConfiguration(
+            system_message="Sys", user_message="Usr", response_model=None, provenance_metadata={}, max_retries=-1
+        )
