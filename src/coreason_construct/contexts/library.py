@@ -8,7 +8,45 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from typing import Any
+
 from coreason_construct.schemas.base import ComponentType, PromptComponent
+
+
+class PatientHistory(PromptComponent):
+    """
+    Dynamic Context: Injects patient history based on ID.
+    """
+
+    type: ComponentType = ComponentType.CONTEXT
+
+    def __init__(self, patient_id: str, priority: int = 7, **data: Any) -> None:
+        if "content" not in data:
+            data["content"] = (
+                f"Patient History for ID: {patient_id}.\n"
+                "[Dynamic patient history data would be injected here from the database]"
+            )
+        super().__init__(
+            name=f"PatientHistory_{patient_id}", priority=priority, type=ComponentType.CONTEXT, **data
+        )
+
+
+class StudyProtocol(PromptComponent):
+    """
+    Dynamic Context: Injects study protocol based on NCT ID.
+    """
+
+    type: ComponentType = ComponentType.CONTEXT
+
+    def __init__(self, nct_id: str, priority: int = 7, **data: Any) -> None:
+        if "content" not in data:
+            data["content"] = (
+                f"Study Protocol for NCT ID: {nct_id}.\n"
+                "[Dynamic protocol data would be injected here from the database]"
+            )
+        super().__init__(
+            name=f"StudyProtocol_{nct_id}", priority=priority, type=ComponentType.CONTEXT, **data
+        )
 
 
 def create_static_context(name: str, content: str, priority: int = 5) -> PromptComponent:
