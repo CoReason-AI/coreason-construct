@@ -28,6 +28,18 @@ def test_prompt_component_default_priority() -> None:
     assert component.priority == 1
 
 
+def test_prompt_component_priority_validation() -> None:
+    # Test lower bound
+    with pytest.raises(ValidationError) as exc:
+        PromptComponent(name="Test", type=ComponentType.ROLE, content="Content", priority=0)
+    assert "Input should be greater than or equal to 1" in str(exc.value)
+
+    # Test upper bound
+    with pytest.raises(ValidationError) as exc:
+        PromptComponent(name="Test", type=ComponentType.ROLE, content="Content", priority=11)
+    assert "Input should be less than or equal to 10" in str(exc.value)
+
+
 def test_prompt_component_render() -> None:
     component = PromptComponent(name="TestComponent", type=ComponentType.ROLE, content="Hello, {name}!")
     rendered = component.render(name="World")
@@ -38,6 +50,25 @@ def test_prompt_component_render_missing_kwargs() -> None:
     component = PromptComponent(name="TestComponent", type=ComponentType.ROLE, content="Hello, {name}!")
     with pytest.raises(KeyError):
         component.render()
+
+
+def test_prompt_component_render_extra_kwargs() -> None:
+    component = PromptComponent(name="TestComponent", type=ComponentType.ROLE, content="Hello, {name}!")
+    rendered = component.render(name="World", extra="IgnoreMe")
+    assert rendered == "Hello, World!"
+
+
+def test_prompt_component_render_escaped_braces() -> None:
+    component = PromptComponent(name="TestComponent", type=ComponentType.ROLE, content="Hello, {{name}}!")
+    rendered = component.render(name="World")
+    # In python format, {{ escapes to {
+    assert rendered == "Hello, {name}!"
+
+    component_mixed = PromptComponent(
+        name="Mixed", type=ComponentType.ROLE, content="Value: {val}, Escaped: {{escaped}}"
+    )
+    rendered_mixed = component_mixed.render(val="10")
+    assert rendered_mixed == "Value: 10, Escaped: {escaped}"
 
 
 def test_prompt_configuration_initialization() -> None:
@@ -70,3 +101,11 @@ def test_prompt_configuration_validation() -> None:
             user_message="User",
             # Missing response_model and provenance_metadata
         )  # type: ignore[call-arg]
+
+
+def test_prompt_configuration_retries_validation() -> None:
+    with pytest.raises(ValidationError) as exc:
+        PromptConfiguration(
+            system_message="System", user_message="User", response_model=None, provenance_metadata={}, max_retries=-1
+        )
+    assert "Input should be greater than or equal to 0" in str(exc.value)

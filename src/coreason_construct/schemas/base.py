@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict, Optional, Type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ComponentType(str, Enum):
@@ -16,7 +16,7 @@ class PromptComponent(BaseModel):
     name: str
     type: ComponentType
     content: str
-    priority: int = 1  # 1 (Low) to 10 (Critical)
+    priority: int = Field(default=1, ge=1, le=10, description="Priority from 1 (Low) to 10 (Critical)")
 
     def render(self, **kwargs: str) -> str:
         return self.content.format(**kwargs)
@@ -26,5 +26,5 @@ class PromptConfiguration(BaseModel):
     system_message: str
     user_message: str
     response_model: Optional[Type[BaseModel]]
-    max_retries: int = 3
+    max_retries: int = Field(default=3, ge=0)
     provenance_metadata: Dict[str, str]  # For Veritas Logging
