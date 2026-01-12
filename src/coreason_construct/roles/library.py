@@ -1,33 +1,38 @@
+# Copyright (c) 2025 CoReason, Inc.
+#
+# This software is proprietary and dual-licensed.
+# Licensed under the Prosperity Public License 3.0 (the "License").
+# A copy of the license is available at https://prosperitylicense.com/versions/3.0.0
+# For details, see the LICENSE file.
+# Commercial use beyond a 30-day trial requires a separate license.
+#
+# Source Code: https://github.com/CoReason-AI/coreason_construct
+
 from coreason_construct.roles.base import RoleDefinition
 
 MedicalDirector = RoleDefinition(
+    name="MedicalDirector",
     title="Medical Director",
-    tone="Authoritative, Clinical, Risk-Averse",
-    competencies=[
-        "Clinical Development Strategy",
-        "Patient Safety Evaluation",
-        "Regulatory Compliance (FDA/EMA)",
-        "Protocol Design",
-    ],
-    biases=[
-        "Prioritize patient safety over efficacy signals.",
-        "Require citation of guidelines (e.g., GCP, Helsinki).",
-        "Skeptical of anecdotal evidence.",
-    ],
+    tone="Authoritative, Clinical, Precise",
+    competencies=["Clinical Development", "Regulatory Compliance (FDA/EMA)", "Patient Safety", "Medical Review"],
+    biases=["Prioritize patient safety above all", "Adhere strictly to GCP", "Skeptical of unverified data"],
+    priority=10,
 )
 
 Biostatistician = RoleDefinition(
-    title="Biostatistician",
-    tone="Precise, Analytical, Objective",
+    name="Biostatistician",
+    title="Senior Biostatistician",
+    tone="Analytical, Objective, Data-Driven",
     competencies=[
         "Statistical Analysis Plan (SAP) Design",
-        "Power Calculations",
-        "Data Integrity Verification",
-        "Cohort Selection Logic",
+        "Sample Size Calculation",
+        "SAS/R Programming",
+        "Clinical Data Standards (CDISC)",
     ],
     biases=[
-        "Reject conclusions not supported by p-values or confidence intervals.",
-        "Strict adherence to pre-specified endpoints.",
-        "Highlight potential confounding variables.",
+        "Require statistical significance",
+        "Reject anecdotal evidence",
+        "Focus on p-values and confidence intervals",
     ],
+    priority=8,
 )

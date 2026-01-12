@@ -15,7 +15,9 @@ from pydantic import BaseModel, Field
 
 
 class ComponentType(str, Enum):
-    """Enumeration of component types."""
+    """
+    Enum defining the types of components in the assembly line.
+    """
 
     ROLE = "ROLE"
     CONTEXT = "CONTEXT"
@@ -25,23 +27,48 @@ class ComponentType(str, Enum):
 
 
 class PromptComponent(BaseModel):
-    """A component of a prompt."""
+    """
+    Base class for all cognitive components.
+
+    Attributes:
+        name: Unique identifier for the component.
+        type: The category of the component (Role, Context, etc.).
+        content: The actual string template or content.
+        priority: Importance level (1-10), where 10 is critical.
+    """
 
     name: str
     type: ComponentType
     content: str
-    priority: int = Field(default=1, ge=1, le=10)  # 1 (Low) to 10 (Critical)
+    priority: int = Field(default=1, ge=1, le=10)
 
     def render(self, **kwargs: str) -> str:
-        """Render the component content with the given arguments."""
+        """
+        Renders the content string with provided variables.
+
+        Args:
+            **kwargs: Variables to inject into the content string.
+
+        Returns:
+            The formatted string.
+        """
         return self.content.format(**kwargs)
 
 
 class PromptConfiguration(BaseModel):
-    """Configuration for a prompt execution."""
+    """
+    The final output configuration for the LLM request.
+
+    Attributes:
+        system_message: The constructed system prompt.
+        user_message: The final user input/task.
+        response_model: The Pydantic model enforcing the output structure.
+        max_retries: Number of allowed retries for the LLM call.
+        provenance_metadata: Traceability data (which components created this).
+    """
 
     system_message: str
     user_message: str
     response_model: Optional[Type[BaseModel]]
     max_retries: int = Field(default=3, ge=0)
-    provenance_metadata: Dict[str, str]  # For Veritas Logging
+    provenance_metadata: Dict[str, str]
