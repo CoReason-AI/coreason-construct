@@ -26,9 +26,7 @@ class PatientHistory(PromptComponent):
                 f"Patient History for ID: {patient_id}.\n"
                 "[Dynamic patient history data would be injected here from the database]"
             )
-        super().__init__(
-            name=f"PatientHistory_{patient_id}", priority=priority, type=ComponentType.CONTEXT, **data
-        )
+        super().__init__(name=f"PatientHistory_{patient_id}", priority=priority, type=ComponentType.CONTEXT, **data)
 
 
 class StudyProtocol(PromptComponent):
@@ -44,9 +42,7 @@ class StudyProtocol(PromptComponent):
                 f"Study Protocol for NCT ID: {nct_id}.\n"
                 "[Dynamic protocol data would be injected here from the database]"
             )
-        super().__init__(
-            name=f"StudyProtocol_{nct_id}", priority=priority, type=ComponentType.CONTEXT, **data
-        )
+        super().__init__(name=f"StudyProtocol_{nct_id}", priority=priority, type=ComponentType.CONTEXT, **data)
 
 
 def create_static_context(name: str, content: str, priority: int = 5) -> PromptComponent:
