@@ -42,12 +42,49 @@ def test_prompt_component_priority_validation() -> None:
     with pytest.raises(ValidationError):
         PromptComponent(name="TestRole", type=ComponentType.ROLE, content="test", priority=11)
 
+    # Test exact boundaries
+    c_min = PromptComponent(name="Min", type=ComponentType.ROLE, content="test", priority=1)
+    assert c_min.priority == 1
+
+    c_max = PromptComponent(name="Max", type=ComponentType.ROLE, content="test", priority=10)
+    assert c_max.priority == 10
+
 
 def test_prompt_component_render() -> None:
     """Test PromptComponent render method."""
     component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
     rendered = component.render(role="doctor")
     assert rendered == "You are a doctor."
+
+
+def test_prompt_component_render_missing_keys() -> None:
+    """Test render method raises KeyError when keys are missing."""
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
+    with pytest.raises(KeyError):
+        component.render()
+
+
+def test_prompt_component_render_extra_keys() -> None:
+    """Test render method ignores extra keys."""
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
+    # Should not raise
+    rendered = component.render(role="doctor", extra="ignored")
+    assert rendered == "You are a doctor."
+
+
+def test_prompt_component_render_escaped_braces() -> None:
+    """Test render method handles escaped braces."""
+    component = PromptComponent(name="TestJSON", type=ComponentType.DATA, content='JSON: {{ "key": "{value}" }}')
+    rendered = component.render(value="test")
+    assert rendered == 'JSON: { "key": "test" }'
+
+
+def test_prompt_component_unicode() -> None:
+    """Test PromptComponent with Unicode characters."""
+    content = "Role: 👨‍⚕️ {role_name}"
+    component = PromptComponent(name="EmojiRole", type=ComponentType.ROLE, content=content)
+    rendered = component.render(role_name="Doctor")
+    assert rendered == "Role: 👨‍⚕️ Doctor"
 
 
 def test_prompt_configuration_initialization() -> None:
@@ -80,3 +117,9 @@ def test_prompt_configuration_max_retries_validation() -> None:
         PromptConfiguration(
             system_message="System", user_message="User", response_model=None, provenance_metadata={}, max_retries=-1
         )
+
+    # Test zero retries (valid)
+    config = PromptConfiguration(
+        system_message="System", user_message="User", response_model=None, provenance_metadata={}, max_retries=0
+    )
+    assert config.max_retries == 0
