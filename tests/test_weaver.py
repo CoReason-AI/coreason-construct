@@ -78,3 +78,11 @@ def test_weaver_sorting() -> None:
     assert sorted_comps[0].name == "HIPAA"
     assert sorted_comps[1].name == "MedicalDirector"
     assert sorted_comps[2].name == "GxP"
+
+
+def test_weaver_build_defaults() -> None:
+    """Test build with default arguments."""
+    weaver = Weaver()
+    # Should not raise error when variables is None (default)
+    config = weaver.build(user_input="Test input")
+    assert config.user_message == "Test input"
