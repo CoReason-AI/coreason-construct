@@ -16,6 +16,7 @@ MedicalDirector = RoleDefinition(
     tone="Authoritative, Clinical, Precise",
     competencies=["Clinical Development", "Regulatory Compliance (FDA/EMA)", "Patient Safety", "Medical Review"],
     biases=["Prioritize patient safety above all", "Adhere strictly to GCP", "Skeptical of unverified data"],
+    dependencies=["HIPAA"],
     priority=10,
 )
 
