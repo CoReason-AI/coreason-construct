@@ -70,13 +70,13 @@ def test_weaver_sorting() -> None:
     assert priorities == [10, 10, 9]
 
     # Check specifically that MedicalDirector (10) and HIPAA (10) are before GxP (9)
-    # The order between MedicalDirector and HIPAA depends on insertion order and stable sort
-    # HIPAA is added BEFORE MedicalDirector in the `add` method logic:
-    # if role == MedDir: append(HIPAA); append(MedDir)
-    # So HIPAA is first in list.
+    # The order between MedicalDirector and HIPAA depends on insertion order and stable sort.
+    # New Logic: Role is added to list first, then dependencies.
+    # So MedicalDirector is added before HIPAA.
+    # Stable sort preserves this.
 
-    assert sorted_comps[0].name == "HIPAA"
-    assert sorted_comps[1].name == "MedicalDirector"
+    assert sorted_comps[0].name == "MedicalDirector"
+    assert sorted_comps[1].name == "HIPAA"
     assert sorted_comps[2].name == "GxP"
 
 
@@ -86,3 +86,16 @@ def test_weaver_build_defaults() -> None:
     # Should not raise error when variables is None (default)
     config = weaver.build(user_input="Test input")
     assert config.user_message == "Test input"
+
+
+def test_weaver_duplicate_add_early_exit() -> None:
+    """Test that adding the same component twice returns early."""
+    weaver = Weaver()
+    weaver.add(MedicalDirector)
+
+    initial_count = len(weaver.components)
+
+    # Add again
+    weaver.add(MedicalDirector)
+
+    assert len(weaver.components) == initial_count
