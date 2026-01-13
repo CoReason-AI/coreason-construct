@@ -39,6 +39,16 @@ class Weaver:
         Add a component to the weaver.
         Handles dependency resolution.
         """
+        # Avoid duplicate addition
+        if self._has_component(component.name):
+            return self
+
+        # Add the component first to handle circular dependencies (breaking the recursion)
+        self.components.append(component)
+
+        if isinstance(component, StructuredPrimitive):
+            self._response_model = component.response_model
+
         # 1. Dependency Resolution
         if hasattr(component, "dependencies"):
             # If I access it dynamically:
@@ -47,14 +57,10 @@ class Weaver:
                 if not self._has_component(dep_name):
                     context = CONTEXT_REGISTRY.get(dep_name)
                     if context:
-                        self.components.append(context)
+                        # Recursive call to handle transitive dependencies
+                        self.add(context)
                     else:
                         logger.warning(f"Dependency '{dep_name}' required by '{component.name}' not found in registry.")
-
-        self.components.append(component)
-
-        if isinstance(component, StructuredPrimitive):
-            self._response_model = component.response_model
 
         return self
 
