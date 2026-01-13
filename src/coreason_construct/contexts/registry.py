@@ -8,12 +8,14 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
-from typing import Dict
+from typing import Dict, Type, Union
 
-from coreason_construct.contexts.library import GxP_Context, HIPAA_Context
+from coreason_construct.contexts.library import GxP_Context, HIPAA_Context, PatientHistory, StudyProtocol
 from coreason_construct.schemas.base import PromptComponent
 
-CONTEXT_REGISTRY: Dict[str, PromptComponent] = {
+CONTEXT_REGISTRY: Dict[str, Union[PromptComponent, Type[PromptComponent]]] = {
     "HIPAA": HIPAA_Context,
     "GxP": GxP_Context,
+    "PatientHistory": PatientHistory,
+    "StudyProtocol": StudyProtocol,
 }

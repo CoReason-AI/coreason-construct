@@ -8,7 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
-from typing import Any, Dict, List, Optional, Type
+import inspect
+from typing import Any, Dict, List, Optional, Type, Union
 
 from loguru import logger
 from pydantic import BaseModel
@@ -23,9 +24,10 @@ class Weaver:
     The Builder Engine that stitches components into the final request configuration.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, context_data: Optional[Dict[str, Any]] = None) -> None:
         self.components: List[PromptComponent] = []
         self._response_model: Optional[Type[BaseModel]] = None
+        self.context_data: Dict[str, Any] = context_data or {}
 
     def _has_component(self, name: str) -> bool:
         return any(c.name == name for c in self.components)
@@ -33,6 +35,56 @@ class Weaver:
     def _sort_components(self, components: List[PromptComponent]) -> List[PromptComponent]:
         # Sort by priority (descending), then stable
         return sorted(components, key=lambda c: c.priority, reverse=True)
+
+    def _resolve_dependency(self, dep_name: str) -> Optional[PromptComponent]:
+        """
+        Resolves a dependency name to a PromptComponent instance.
+        Supports both static instances and dynamic class instantiation.
+        """
+        registry_item: Optional[Union[PromptComponent, Type[PromptComponent]]] = CONTEXT_REGISTRY.get(dep_name)
+
+        if not registry_item:
+            return None
+
+        # Case 1: Registry item is already an instance
+        if isinstance(registry_item, PromptComponent):
+            return registry_item
+
+        # Case 2: Registry item is a class (Dynamic Context)
+        if isinstance(registry_item, type) and issubclass(registry_item, PromptComponent):
+            # Inspect __init__ to see what arguments it needs
+            init_signature = inspect.signature(registry_item.__init__)
+            init_params = init_signature.parameters
+
+            # Prepare arguments from context_data
+            kwargs = {}
+            missing_params = []
+
+            for param_name, param in init_params.items():
+                if param_name == "self":
+                    continue
+                # If param is in context_data, use it
+                if param_name in self.context_data:
+                    kwargs[param_name] = self.context_data[param_name]
+                # If param has no default value and is missing, flag it
+                elif param.default == inspect.Parameter.empty and param.kind not in (
+                    inspect.Parameter.VAR_POSITIONAL,
+                    inspect.Parameter.VAR_KEYWORD,
+                ):
+                    missing_params.append(param_name)
+
+            if missing_params:
+                logger.warning(
+                    f"Cannot instantiate dependency '{dep_name}': Missing required context data: {missing_params}"
+                )
+                return None
+
+            try:
+                return registry_item(**kwargs)
+            except Exception as e:
+                logger.error(f"Failed to instantiate dependency '{dep_name}': {e}")
+
+        return None
 
     def add(self, component: PromptComponent) -> "Weaver":
         """
@@ -51,16 +103,26 @@ class Weaver:
 
         # 1. Dependency Resolution
         if hasattr(component, "dependencies"):
-            # If I access it dynamically:
             deps: List[str] = getattr(component, "dependencies", [])
             for dep_name in deps:
-                if not self._has_component(dep_name):
-                    context = CONTEXT_REGISTRY.get(dep_name)
+                # Resolve the dependency (instance or new instance from class)
+                if not self._has_component(dep_name) and not any(
+                    c.name.startswith(f"{dep_name}_") for c in self.components
+                ):
+                    # Note: The check startswith is a heuristic for dynamic components like PatientHistory_123
+                    # But exact name match check is safer if the dynamic component sets a predictable name.
+                    # Ideally we resolve it, check its name, then decide.
+
+                    context = self._resolve_dependency(dep_name)
+
                     if context:
                         # Recursive call to handle transitive dependencies
                         self.add(context)
                     else:
-                        logger.warning(f"Dependency '{dep_name}' required by '{component.name}' not found in registry.")
+                        logger.warning(
+                            f"Dependency '{dep_name}' required by '{component.name}' "
+                            "not found or could not be instantiated."
+                        )
 
         return self
 
