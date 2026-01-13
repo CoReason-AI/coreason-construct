@@ -77,4 +77,7 @@ def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any]) -> None:
 
     captured = capsys.readouterr()
     # Check stderr for the warning
-    assert "Dependency 'NonExistentContext' required by 'MedicalDirector' not found in registry." in captured.err
+    assert (
+        "Dependency 'NonExistentContext' required by 'MedicalDirector' not found or could not be instantiated."
+        in captured.err
+    )
