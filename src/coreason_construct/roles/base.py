@@ -24,6 +24,7 @@ class RoleDefinition(PromptComponent):
         tone: The required tone of voice.
         competencies: List of key skills or knowledge areas.
         biases: specific biases or perspectives this role should adopt.
+        dependencies: List of context names that this role requires.
     """
 
     type: ComponentType = ComponentType.ROLE
@@ -31,6 +32,7 @@ class RoleDefinition(PromptComponent):
     tone: str
     competencies: List[str]
     biases: List[str] = Field(default_factory=list)
+    dependencies: List[str] = Field(default_factory=list)
 
     def __init__(self, **data: Any) -> None:
         # Auto-generate content if not explicitly provided, based on attributes

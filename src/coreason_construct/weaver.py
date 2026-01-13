@@ -10,9 +10,10 @@
 
 from typing import Any, Dict, List, Optional, Type
 
+from loguru import logger
 from pydantic import BaseModel
 
-from coreason_construct.contexts.library import HIPAA_Context
+from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.primitives.base import StructuredPrimitive
 from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
 
@@ -38,14 +39,28 @@ class Weaver:
         Add a component to the weaver.
         Handles dependency resolution.
         """
-        # 1. Dependency Resolution
-        if component.name == "MedicalDirector" and not self._has_component("HIPAA"):
-            self.components.append(HIPAA_Context)
+        # Avoid duplicate addition
+        if self._has_component(component.name):
+            return self
 
+        # Add the component first to handle circular dependencies (breaking the recursion)
         self.components.append(component)
 
         if isinstance(component, StructuredPrimitive):
             self._response_model = component.response_model
+
+        # 1. Dependency Resolution
+        if hasattr(component, "dependencies"):
+            # If I access it dynamically:
+            deps: List[str] = getattr(component, "dependencies", [])
+            for dep_name in deps:
+                if not self._has_component(dep_name):
+                    context = CONTEXT_REGISTRY.get(dep_name)
+                    if context:
+                        # Recursive call to handle transitive dependencies
+                        self.add(context)
+                    else:
+                        logger.warning(f"Dependency '{dep_name}' required by '{component.name}' not found in registry.")
 
         return self
 
