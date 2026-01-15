@@ -9,8 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 import pytest
-from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
 from pydantic import BaseModel, ValidationError
+
+from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
 
 
 def test_component_type_enum() -> None:

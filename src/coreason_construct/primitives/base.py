@@ -10,8 +10,9 @@
 
 from typing import Any, Type
 
-from coreason_construct.schemas.base import ComponentType, PromptComponent
 from pydantic import BaseModel
+
+from coreason_construct.schemas.base import ComponentType, PromptComponent
 
 
 class StructuredPrimitive(PromptComponent):

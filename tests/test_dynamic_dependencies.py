@@ -10,11 +10,12 @@
 
 from typing import Any
 
+from pytest import CaptureFixture
+
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.roles.base import RoleDefinition
 from coreason_construct.schemas.base import PromptComponent
 from coreason_construct.weaver import Weaver
-from pytest import CaptureFixture
 
 
 def test_dynamic_dependency_injection() -> None:

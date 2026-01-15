@@ -11,8 +11,9 @@
 from enum import Enum
 from typing import Type
 
-from coreason_construct.primitives.base import StructuredPrimitive
 from pydantic import Field, create_model
+
+from coreason_construct.primitives.base import StructuredPrimitive
 
 
 class ClassificationPrimitive(StructuredPrimitive):

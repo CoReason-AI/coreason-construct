@@ -74,8 +74,9 @@ class TestWeaverTokenOptimization:
         # Primitives usually have priority 10 by default in library.
         # But let's check explicit behavior.
 
-        from coreason_construct.primitives.base import StructuredPrimitive
         from pydantic import BaseModel
+
+        from coreason_construct.primitives.base import StructuredPrimitive
 
         class MockModel(BaseModel):
             pass

@@ -9,8 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 import pytest
-from coreason_construct.schemas.clinical import AdverseEvent, Causality, Outcome, Severity
 from pydantic import ValidationError
+
+from coreason_construct.schemas.clinical import AdverseEvent, Causality, Outcome, Severity
 
 
 def test_adverse_event_valid() -> None:
