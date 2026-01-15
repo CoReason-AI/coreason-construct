@@ -76,7 +76,7 @@ class TypeCheckComp(BaseDynamicComp):
             self.content += f" (Type: {type(count).__name__})"
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def registry_cleanup() -> Generator[None, None, None]:
     """Saves and restores the registry state."""
     original_keys = list(CONTEXT_REGISTRY.keys())
