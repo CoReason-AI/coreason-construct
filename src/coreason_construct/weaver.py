@@ -126,29 +126,80 @@ class Weaver:
 
         return self
 
-    def build(self, user_input: str, variables: Optional[Dict[str, Any]] = None) -> PromptConfiguration:
+    def _estimate_tokens(self, text: str) -> int:
+        """
+        Heuristic for estimating tokens (approx. 4 chars per token).
+        """
+        return len(text) // 4
+
+    def build(
+        self, user_input: str, variables: Optional[Dict[str, Any]] = None, max_tokens: Optional[int] = None
+    ) -> PromptConfiguration:
         """
         Build the final prompt configuration.
+
+        Args:
+            user_input: The input data from the user.
+            variables: Optional variables to render components.
+            max_tokens: Maximum allowed estimated tokens. If exceeded, low priority components are dropped.
         """
         if variables is None:
             variables = {}
-        # 2. Optimization (Mock logic)
-        # if total_tokens > limit: remove_low_priority(self.components)
 
-        sorted_comps = self._sort_components(self.components)
+        # 2. Optimization Logic
+        active_components = list(self.components)
 
+        while True:
+            # Re-sort/Filter active components
+            sorted_comps = self._sort_components(active_components)
+
+            # Generate Parts
+            system_parts = [c.render(**variables) for c in sorted_comps if c.type != ComponentType.PRIMITIVE]
+            task_part = next((c.render(**variables) for c in sorted_comps if c.type == ComponentType.PRIMITIVE), "")
+            final_user_msg = f"{task_part}\n\nINPUT DATA:\n{user_input}" if task_part else user_input
+            system_msg = "\n\n".join(system_parts)
+
+            # Check Limits
+            total_text = system_msg + final_user_msg
+            estimated_tokens = self._estimate_tokens(total_text)
+
+            if max_tokens is None or estimated_tokens <= max_tokens:
+                break
+
+            # Need to truncate. Find lowest priority component that is not Critical (10).
+            # PRD: "truncates 'Low Priority' contexts".
+            # We sort by priority ascending to find removal candidates.
+            # We filter out Priority 10 (Critical) components to ensure they are preserved.
+            candidates = sorted([c for c in active_components if c.priority < 10], key=lambda c: c.priority)
+
+            if not candidates:
+                logger.warning(
+                    f"Token limit exceeded ({estimated_tokens} > {max_tokens}), "
+                    "but only Critical (Priority 10) components remain. Cannot truncate further."
+                )
+                break
+
+            # Remove the lowest priority one
+            to_remove = candidates[0]
+            logger.info(
+                f"Token limit exceeded ({estimated_tokens} > {max_tokens}). "
+                f"Dropping component '{to_remove.name}' (Priority: {to_remove.priority})."
+            )
+            active_components.remove(to_remove)
+
+            if not active_components:
+                break
+
+        # Final Build with active_components
+        sorted_comps = self._sort_components(active_components)
         system_parts = [c.render(**variables) for c in sorted_comps if c.type != ComponentType.PRIMITIVE]
-
-        # Primitive's content (task instructions) usually goes at the end or in user message,
-        # but PRD says "task_part = next(...)" so we treat it specifically.
         task_part = next((c.render(**variables) for c in sorted_comps if c.type == ComponentType.PRIMITIVE), "")
-
         final_user_msg = f"{task_part}\n\nINPUT DATA:\n{user_input}" if task_part else user_input
 
         # 3. Provenance Capture
         metadata = {
-            "role": next((c.name for c in self.components if c.type == ComponentType.ROLE), "None"),
-            "mode": next((c.name for c in self.components if c.type == ComponentType.MODE), "None"),
+            "role": next((c.name for c in active_components if c.type == ComponentType.ROLE), "None"),
+            "mode": next((c.name for c in active_components if c.type == ComponentType.MODE), "None"),
             "schema": self._response_model.__name__ if self._response_model else "None",
         }
 
