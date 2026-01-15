@@ -10,9 +10,8 @@
 
 from typing import Type
 
-from pydantic import BaseModel
-
 from coreason_construct.primitives.base import StructuredPrimitive
+from pydantic import BaseModel
 
 
 class ExtractionPrimitive(StructuredPrimitive):

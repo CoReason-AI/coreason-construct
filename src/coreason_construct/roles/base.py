@@ -10,9 +10,8 @@
 
 from typing import Any, List
 
-from pydantic import Field
-
 from coreason_construct.schemas.base import ComponentType, PromptComponent
+from pydantic import Field
 
 
 class RoleDefinition(PromptComponent):

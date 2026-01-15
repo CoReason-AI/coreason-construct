@@ -11,11 +11,10 @@
 from typing import Any, Generator, List, Optional
 
 import pytest
-from loguru import logger
-
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
+from loguru import logger
 
 
 # --- Helpers for Dynamic Classes ---
@@ -76,7 +75,7 @@ class TypeCheckComp(BaseDynamicComp):
             self.content += f" (Type: {type(count).__name__})"
 
 
-@pytest.fixture  # type: ignore[misc]
+@pytest.fixture
 def registry_cleanup() -> Generator[None, None, None]:
     """Saves and restores the registry state."""
     original_keys = list(CONTEXT_REGISTRY.keys())

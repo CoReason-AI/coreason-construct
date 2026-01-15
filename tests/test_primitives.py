@@ -10,11 +10,10 @@
 
 from enum import Enum
 
-from pydantic import BaseModel
-
 from coreason_construct.primitives.classify import ClassificationPrimitive
 from coreason_construct.primitives.extract import ExtractionPrimitive
 from coreason_construct.schemas.base import ComponentType
+from pydantic import BaseModel
 
 
 class Colors(str, Enum):

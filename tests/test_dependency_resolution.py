@@ -10,11 +10,10 @@
 
 from typing import Any
 
-from pytest import CaptureFixture
-
 from coreason_construct.contexts.library import HIPAA_Context
 from coreason_construct.roles.library import Biostatistician, MedicalDirector
 from coreason_construct.weaver import Weaver
+from pytest import CaptureFixture
 
 
 def test_weaver_auto_dependency_medical_director() -> None:
