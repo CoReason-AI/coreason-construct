@@ -8,8 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from typing import List
+
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from coreason_construct.schemas.clinical import AdverseEvent, Causality, Outcome, Severity
 
@@ -52,3 +54,53 @@ def test_adverse_event_invalid_causality() -> None:
     with pytest.raises(ValidationError) as exc:
         AdverseEvent(term="Pain", severity=Severity.MILD, causality="MAYBE")
     assert "causality" in str(exc.value)
+
+
+def test_adverse_event_empty_term() -> None:
+    """Test validation error for empty term string."""
+    with pytest.raises(ValidationError) as exc:
+        AdverseEvent(term="", severity=Severity.MILD)
+    assert "term" in str(exc.value)
+    assert "String should have at least 1 character" in str(exc.value)
+
+
+def test_enum_case_sensitivity() -> None:
+    """Test that Enums are case-sensitive (strict)."""
+    # Should fail for lowercase "mild"
+    with pytest.raises(ValidationError) as exc:
+        AdverseEvent(term="Pain", severity="mild")
+    assert "severity" in str(exc.value)
+
+
+def test_complex_batch_parsing() -> None:
+    """Test parsing a complex nested structure mimicking LLM output."""
+
+    class PatientSafetyReport(BaseModel):
+        patient_id: str
+        events: List[AdverseEvent]
+
+    # Simulating JSON output from an LLM
+    raw_data = {
+        "patient_id": "PT-12345",
+        "events": [
+            {"term": "Headache", "severity": "MILD", "outcome": "RECOVERED"},
+            {"term": "Nausea", "severity": "MODERATE", "causality": "POSSIBLY_RELATED"},
+        ],
+    }
+
+    report = PatientSafetyReport(**raw_data)
+
+    assert report.patient_id == "PT-12345"
+    assert len(report.events) == 2
+
+    evt1 = report.events[0]
+    assert evt1.term == "Headache"
+    assert evt1.severity == Severity.MILD
+    assert evt1.outcome == Outcome.RECOVERED
+    assert evt1.causality is None
+
+    evt2 = report.events[1]
+    assert evt2.term == "Nausea"
+    assert evt2.severity == Severity.MODERATE
+    assert evt2.causality == Causality.POSSIBLY_RELATED
+    assert evt2.outcome is None

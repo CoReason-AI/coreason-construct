@@ -48,7 +48,7 @@ class AdverseEvent(BaseModel):
     Schema for a clinical Adverse Event (AE).
     """
 
-    term: str = Field(description="The medical term for the adverse event (e.g., 'Nausea', 'Headache').")
+    term: str = Field(description="The medical term for the adverse event (e.g., 'Nausea', 'Headache').", min_length=1)
     severity: Severity = Field(description="The intensity of the event.")
     causality: Optional[Causality] = Field(default=None, description="The causal relationship to the intervention.")
     outcome: Optional[Outcome] = Field(default=None, description="The final outcome of the event.")
