@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 from coreason_construct.roles.base import RoleDefinition
-from coreason_construct.roles.library import Biostatistician, MedicalDirector
+from coreason_construct.roles.library import Biostatistician, MedicalDirector, SafetyScientist
 from coreason_construct.schemas.base import ComponentType
 
 
@@ -44,3 +44,16 @@ def test_biostatistician_role() -> None:
     assert role.name == "Biostatistician"
     assert "Data-Driven" in role.tone
     assert "SAS/R Programming" in role.content
+
+
+def test_safety_scientist_role() -> None:
+    """Test the SafetyScientist pre-defined role."""
+    role = SafetyScientist
+    assert role.name == "SafetyScientist"
+    assert role.title == "Senior Safety Scientist"
+    assert role.priority == 10
+    assert "Vigilant" in role.tone
+    assert "Pharmacovigilance (PV)" in role.content
+    assert "Assume causality until proven otherwise" in role.content
+    assert "HIPAA" in role.dependencies
+    assert "GxP" in role.dependencies
