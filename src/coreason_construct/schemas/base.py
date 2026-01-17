@@ -9,8 +9,9 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 from enum import Enum
-from typing import Dict, Optional, Type
+from typing import Any, Dict, Optional, Type
 
+from jinja2 import StrictUndefined, Template
 from pydantic import BaseModel, Field
 
 
@@ -42,9 +43,9 @@ class PromptComponent(BaseModel):
     content: str
     priority: int = Field(default=1, ge=1, le=10)
 
-    def render(self, **kwargs: str) -> str:
+    def render(self, **kwargs: Any) -> str:
         """
-        Renders the content string with provided variables.
+        Renders the content string with provided variables using Jinja2.
 
         Args:
             **kwargs: Variables to inject into the content string.
@@ -52,7 +53,15 @@ class PromptComponent(BaseModel):
         Returns:
             The formatted string.
         """
-        return self.content.format(**kwargs)
+        # Best Practice: Use Jinja2 for robust template rendering instead of str.format.
+        # StrictUndefined ensures an error is raised if a variable is missing, matching the strictness of str.format.
+        # We explicitly pass `undefined=StrictUndefined` to the Template constructor logic,
+        # but Jinja2 Template API sets environment options slightly differently.
+        # The easiest way for a single template is to pass the environment options to the constructor.
+        # Note: Template(str) creates a default environment. We need to force StrictUndefined.
+        # A cleaner way is to create an Environment, but for atomic rendering:
+        template = Template(self.content, undefined=StrictUndefined)
+        return template.render(**kwargs)
 
 
 class PromptConfiguration(BaseModel):

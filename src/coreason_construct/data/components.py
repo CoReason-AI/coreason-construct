@@ -34,6 +34,7 @@ class FewShotBank(PromptComponent):
     examples: List[FewShotExample]
 
     def __init__(self, name: str, examples: List[FewShotExample], priority: int = 5):
+        # Refactor: Removed manual brace escaping as Jinja2 handles literals correctly.
         formatted_examples = "\n\n".join(f"Input: {ex.input}\nIdeal Output: {ex.output}" for ex in examples)
         content = f"Here are some examples of how to perform the task:\n\n{formatted_examples}"
         super().__init__(name=name, type=ComponentType.DATA, content=content, priority=priority, examples=examples)
