@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 import pytest
+from jinja2 import UndefinedError
 from pydantic import BaseModel, ValidationError
 
 from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
@@ -25,10 +26,11 @@ def test_component_type_enum() -> None:
 
 def test_prompt_component_initialization() -> None:
     """Test PromptComponent initialization with valid data."""
-    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.", priority=5)
+    # Updated to Jinja2 syntax
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {{ role }}.", priority=5)
     assert component.name == "TestRole"
     assert component.type == ComponentType.ROLE
-    assert component.content == "You are a {role}."
+    assert component.content == "You are a {{ role }}."
     assert component.priority == 5
 
 
@@ -52,36 +54,43 @@ def test_prompt_component_priority_validation() -> None:
 
 def test_prompt_component_render() -> None:
     """Test PromptComponent render method."""
-    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
+    # Updated to Jinja2 syntax
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {{ role }}.")
     rendered = component.render(role="doctor")
     assert rendered == "You are a doctor."
 
 
 def test_prompt_component_render_missing_keys() -> None:
-    """Test render method raises KeyError when keys are missing."""
-    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
-    with pytest.raises(KeyError):
+    """Test render method raises Error when keys are missing."""
+    # Updated to Jinja2 syntax
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {{ role }}.")
+    # Jinja2 StrictUndefined raises UndefinedError, not KeyError
+    with pytest.raises(UndefinedError):
         component.render()
 
 
 def test_prompt_component_render_extra_keys() -> None:
     """Test render method ignores extra keys."""
-    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {role}.")
+    # Updated to Jinja2 syntax
+    component = PromptComponent(name="TestRole", type=ComponentType.ROLE, content="You are a {{ role }}.")
     # Should not raise
     rendered = component.render(role="doctor", extra="ignored")
     assert rendered == "You are a doctor."
 
 
 def test_prompt_component_render_escaped_braces() -> None:
-    """Test render method handles escaped braces."""
-    component = PromptComponent(name="TestJSON", type=ComponentType.DATA, content='JSON: {{ "key": "{value}" }}')
+    """Test render method handles literals that look like braces."""
+    # In Jinja2, literal braces don't need escaping unless they look like logic.
+    # We use valid JSON-like structure.
+    component = PromptComponent(name="TestJSON", type=ComponentType.DATA, content='JSON: { "key": "{{ value }}" }')
     rendered = component.render(value="test")
     assert rendered == 'JSON: { "key": "test" }'
 
 
 def test_prompt_component_unicode() -> None:
     """Test PromptComponent with Unicode characters."""
-    content = "Role: 👨‍⚕️ {role_name}"
+    # Updated to Jinja2 syntax
+    content = "Role: 👨‍⚕️ {{ role_name }}"
     component = PromptComponent(name="EmojiRole", type=ComponentType.ROLE, content=content)
     rendered = component.render(role_name="Doctor")
     assert rendered == "Role: 👨‍⚕️ Doctor"
