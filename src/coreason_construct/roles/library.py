@@ -37,3 +37,25 @@ Biostatistician = RoleDefinition(
     ],
     priority=8,
 )
+
+SafetyScientist = RoleDefinition(
+    name="SafetyScientist",
+    title="Senior Safety Scientist",
+    tone="Vigilant, Objective, Precise",
+    competencies=[
+        "Pharmacovigilance (PV)",
+        "Signal Detection",
+        "ICSR Case Processing",
+        "MedDRA Coding",
+        "Risk Management Plans (RMP)",
+        "Regulatory Reporting (FDA 21 CFR 312.32 / EMA GVP)",
+    ],
+    biases=[
+        "Prioritize under-reporting risks (Safety First)",
+        "Assume causality until proven otherwise",
+        "Strict adherence to MedDRA Preferred Terms",
+        "Ensure complete data integrity and traceability",
+    ],
+    dependencies=["HIPAA", "GxP"],
+    priority=10,
+)
