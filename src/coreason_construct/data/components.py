@@ -34,9 +34,10 @@ class FewShotBank(PromptComponent):
     examples: List[FewShotExample]
 
     def __init__(self, name: str, examples: List[FewShotExample], priority: int = 5):
-        # We must escape brace characters in the output string because PromptComponent.render uses .format()
+        # We must escape brace characters in both input and output because PromptComponent.render uses .format()
         formatted_examples = "\n\n".join(
-            f"Input: {ex.input}\nIdeal Output: {str(ex.output).replace('{', '{{').replace('}', '}}')}"
+            f"Input: {ex.input.replace('{', '{{').replace('}', '}}')}\n"
+            f"Ideal Output: {str(ex.output).replace('{', '{{').replace('}', '}}')}"
             for ex in examples
         )
         content = f"Here are some examples of how to perform the task:\n\n{formatted_examples}"
