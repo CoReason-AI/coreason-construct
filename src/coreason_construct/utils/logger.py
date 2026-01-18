@@ -23,16 +23,15 @@ logger.add(
     sys.stderr,
     level="INFO",
     format=(
-        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-        "<level>{level: <8}</level> | "
+        "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | "
         "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     ),
 )
 
 # Ensure logs directory exists
 log_path = Path("logs")
-if not log_path.exists():  # pragma: no cover
-    log_path.mkdir(parents=True, exist_ok=True)
+if not log_path.exists():
+    log_path.mkdir(parents=True, exist_ok=True)  # pragma: no cover
 
 # Sink 2: File (JSON, Rotation, Retention)
 logger.add(
@@ -43,3 +42,5 @@ logger.add(
     enqueue=True,
     level="INFO",
 )
+
+__all__ = ["logger"]
