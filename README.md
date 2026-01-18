@@ -4,7 +4,26 @@
 
 [![CI](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci.yml)
 
-coreason-construct replaces ad-hoc prompt engineering with **Type-Driven Generation**. It provides a strictly typed library of Cognitive Components—Roles, Contexts, Logic Primitives, and Data Banks—assembled by the **Weaver** into optimized prompt configurations.
+## Executive Summary
+
+coreason-construct is the **Standard Library for Cognitive Architecture**.
+
+It replaces ad-hoc prompt engineering with **Type-Driven Generation**. It integrates **instructor** to patch LLM clients, linking Pydantic schemas directly to the model's logits.
+
+However, structure alone is not enough. The package provides a strictly typed library of **Cognitive Components**—Roles, Contexts, Logic Primitives, and Data Banks—that are assembled by the **Weaver**. The Weaver not only enforces output schema but also manages **Dependency Resolution** (context injection) and **Token Optimization** before the request is sent.
+
+## Functional Philosophy: The Assembler Pattern
+
+"Prompts are not written; they are assembled. Outputs are not strings; they are Objects."
+
+A Prompt is an object composed of:
+
+1.  **Identity (Who):** The Role and its biases.
+2.  **Environment (Where):** The regulatory and data context.
+3.  **Mode (How):** The active reasoning style (e.g., "Six Hats", "Socratic").
+4.  **Data (Evidence):** Few-shot examples and negative constraints.
+5.  **Task (What):** The **Structured Primitive** (e.g., CohortLogic, Extract).
+6.  **Output (Type):** The specific Pydantic model the LLM *must* populate.
 
 ## Getting Started
 
@@ -40,8 +59,10 @@ from coreason_construct.schemas.clinical import AdverseEvent
 weaver = Weaver()
 
 # 2. Add Components
-weaver.add(SafetyScientist)  # Automatically injects HIPAA & GxP Contexts
-weaver.add(AE_Examples)      # Injects Few-Shot examples for robust extraction
+# Automatically injects dependencies (e.g., HIPAA & GxP Contexts for SafetyScientist)
+weaver.add(SafetyScientist)
+# Injects Few-Shot examples for robust extraction
+weaver.add(AE_Examples)
 
 # 3. Add the Task (Primitive)
 extractor = ExtractionPrimitive(
@@ -63,13 +84,13 @@ print(config.system_message)
 # - Extraction Instructions
 ```
 
-## Architecture
+## Documentation
 
-- **Roles**: Standardized personas (e.g., `SafetyScientist`, `MedicalDirector`).
-- **Contexts**: Injectable environment constraints (e.g., `HIPAA`, `StudyProtocol`).
-- **Data**: Few-shot examples and dictionaries (e.g., `AE_Examples`).
-- **Primitives**: Structured tasks defined by Pydantic schemas (e.g., `Extract`, `Classify`).
-- **Weaver**: The engine that assembles components, resolves dependencies, and optimizes token usage.
+For more detailed information, please refer to the documentation:
+
+*   [Usage Guide](docs/usage.md): Detailed explanation of components and the Weaver.
+*   [Vignette](docs/vignette.md): A narrative example of using coreason-construct.
+*   [Product Requirements Document](docs/PRD.md): The full PRD for this library.
 
 ## License
 
