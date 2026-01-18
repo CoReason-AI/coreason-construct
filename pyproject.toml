@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coreason_construct"
-version = "0.1.0"
+version = "0.2.0"
 description = "coreason-construct"
 authors = ["Gowtham A Rao <gowtham.rao@coreason.ai>"]
 license = "Prosperity-3.0"
@@ -29,7 +29,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "coreason_construct"
-version = "0.1.0"
+version = "0.2.0"
 description = "coreason-construct"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -44,9 +44,9 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/CoReason-AI/coreason_construct"
-Repository = "https://github.com/CoReason-AI/coreason_construct"
-Documentation = "https://github.com/CoReason-AI/coreason_construct"
+Homepage = "https://github.com/CoReason-AI/coreason-construct"
+Repository = "https://github.com/CoReason-AI/coreason-construct"
+Documentation = "https://github.com/CoReason-AI/coreason-construct"
 
 [tool.ruff]
 line-length = 120
