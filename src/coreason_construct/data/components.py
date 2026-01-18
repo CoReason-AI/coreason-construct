@@ -38,13 +38,6 @@ class FewShotBank(PromptComponent):
         content = f"Here are some examples of how to perform the task:\n\n{formatted_examples}"
         super().__init__(name=name, type=ComponentType.DATA, content=content, priority=priority, examples=examples)
 
-    def render(self, **kwargs: str) -> str:
-        """
-        Override render to avoid string formatting errors with JSON braces.
-        FewShotBank content is static and does not support variable injection.
-        """
-        return self.content
-
 
 class NegativeExample(PromptComponent):
     """

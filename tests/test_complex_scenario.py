@@ -43,7 +43,7 @@ def test_mixed_rendering_variables() -> None:
     dynamic_comp = PromptComponent(
         name="Greeter",
         type=ComponentType.CONTEXT,
-        content="Hello, {user_name}. Welcome to the study.",
+        content="Hello, {{ user_name }}. Welcome to the study.",
         priority=5,
     )
 
