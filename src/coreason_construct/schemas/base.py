@@ -11,6 +11,7 @@
 from enum import Enum
 from typing import Dict, Optional, Type
 
+from jinja2 import StrictUndefined, Template
 from pydantic import BaseModel, Field
 
 
@@ -44,7 +45,7 @@ class PromptComponent(BaseModel):
 
     def render(self, **kwargs: str) -> str:
         """
-        Renders the content string with provided variables.
+        Renders the content string with provided variables using Jinja2.
 
         Args:
             **kwargs: Variables to inject into the content string.
@@ -52,7 +53,9 @@ class PromptComponent(BaseModel):
         Returns:
             The formatted string.
         """
-        return self.content.format(**kwargs)
+        # Use StrictUndefined to ensure missing variables raise errors
+        template = Template(self.content, undefined=StrictUndefined)
+        return template.render(**kwargs)
 
 
 class PromptConfiguration(BaseModel):
