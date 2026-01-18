@@ -2,7 +2,14 @@
 
 **The Standard Library for Cognitive Architecture.**
 
-[![CI](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci-cd.yml)
+[![Docker](https://github.com/CoReason-AI/coreason_construct/actions/workflows/docker.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/docker.yml)
+[![PyPI version](https://badge.fury.io/py/coreason_construct.svg)](https://badge.fury.io/py/coreason_construct)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/coreason_construct.svg)](https://pypi.org/project/coreason_construct/)
+[![License](https://img.shields.io/badge/license-Prosperity%20Public%20License%203.0-blue.svg)](LICENSE)
+[![codecov](https://codecov.io/gh/CoReason-AI/coreason_construct/branch/main/graph/badge.svg)](https://codecov.io/gh/CoReason-AI/coreason_construct)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
 coreason-construct replaces ad-hoc prompt engineering with **Type-Driven Generation**. It provides a strictly typed library of Cognitive Components—Roles, Contexts, Logic Primitives, and Data Banks—assembled by the **Weaver** into optimized prompt configurations.
 
