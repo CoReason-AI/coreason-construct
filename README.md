@@ -2,12 +2,12 @@
 
 **The Standard Library for Cognitive Architecture.**
 
-[![CI/CD](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/ci-cd.yml)
-[![Docker](https://github.com/CoReason-AI/coreason_construct/actions/workflows/docker.yml/badge.svg)](https://github.com/CoReason-AI/coreason_construct/actions/workflows/docker.yml)
+[![CI/CD](https://github.com/CoReason-AI/coreason-construct/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/CoReason-AI/coreason-construct/actions/workflows/ci-cd.yml)
+[![Docker](https://github.com/CoReason-AI/coreason-construct/actions/workflows/docker.yml/badge.svg)](https://github.com/CoReason-AI/coreason-construct/actions/workflows/docker.yml)
 [![PyPI version](https://badge.fury.io/py/coreason_construct.svg)](https://badge.fury.io/py/coreason_construct)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/coreason_construct.svg)](https://pypi.org/project/coreason_construct/)
 [![License](https://img.shields.io/badge/license-Prosperity%20Public%20License%203.0-blue.svg)](LICENSE)
-[![codecov](https://codecov.io/gh/CoReason-AI/coreason_construct/branch/main/graph/badge.svg)](https://codecov.io/gh/CoReason-AI/coreason_construct)
+[![codecov](https://codecov.io/gh/CoReason-AI/coreason-construct/branch/main/graph/badge.svg)](https://codecov.io/gh/CoReason-AI/coreason-construct)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 
