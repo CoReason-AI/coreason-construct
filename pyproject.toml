@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coreason_construct"
-version = "0.2.0"
+version = "0.1.1"
 description = "coreason-construct"
 authors = ["Gowtham A Rao <gowtham.rao@coreason.ai>"]
 license = "Prosperity-3.0"
@@ -29,7 +29,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "coreason_construct"
-version = "0.2.0"
+version = "0.1.1"
 description = "coreason-construct"
 readme = "README.md"
 requires-python = ">=3.11"
