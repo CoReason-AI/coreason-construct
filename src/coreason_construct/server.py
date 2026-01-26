@@ -68,7 +68,7 @@ async def compile_blueprint(request: BlueprintRequest) -> CompilationResponse:
     try:
         config = weaver.build(user_input=request.user_input, variables=request.variables, max_tokens=request.max_tokens)
     except jinja2.exceptions.UndefinedError as e:
-        raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}")
+        raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}") from e
 
     encoding = tiktoken.get_encoding("cl100k_base")
     token_count = len(encoding.encode(config.system_message))

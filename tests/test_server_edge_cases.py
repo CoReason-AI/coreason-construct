@@ -91,9 +91,7 @@ def test_redundant_calls_stress_test() -> None:
 
 def test_compile_missing_variable() -> None:
     """Test behavior when a variable required by a component is missing."""
-    components = [
-        {"name": "TemplateComp", "type": "CONTEXT", "content": "Hello {{ name }}", "priority": 10}
-    ]
+    components = [{"name": "TemplateComp", "type": "CONTEXT", "content": "Hello {{ name }}", "priority": 10}]
     # 'name' is missing in variables
     payload = {"user_input": "Input", "variables": {}, "components": components}
 
@@ -108,11 +106,7 @@ def test_compile_duplicate_components() -> None:
     comp = {"name": "UniqueName", "type": "CONTEXT", "content": "First Content", "priority": 10}
     comp_dup = {"name": "UniqueName", "type": "CONTEXT", "content": "Second Content", "priority": 10}
 
-    payload = {
-        "user_input": "Input",
-        "variables": {},
-        "components": [comp, comp_dup]
-    }
+    payload = {"user_input": "Input", "variables": {}, "components": [comp, comp_dup]}
 
     response = client.post("/v1/compile", json=payload)
     assert response.status_code == 200
@@ -126,11 +120,7 @@ def test_compile_invalid_component_type() -> None:
     """Test passing an invalid component type."""
     comp = {"name": "BadComp", "type": "INVALID_TYPE", "content": "Content", "priority": 10}
 
-    payload = {
-        "user_input": "Input",
-        "variables": {},
-        "components": [comp]
-    }
+    payload = {"user_input": "Input", "variables": {}, "components": [comp]}
 
     response = client.post("/v1/compile", json=payload)
-    assert response.status_code == 422 # Pydantic validation error
+    assert response.status_code == 422  # Pydantic validation error
