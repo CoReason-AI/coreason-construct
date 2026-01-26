@@ -12,7 +12,7 @@
 coreason-construct: The Standard Library for Cognitive Architecture.
 """
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 __author__ = "Gowtham A Rao"
 __email__ = "gowtham.rao@coreason.ai"
 

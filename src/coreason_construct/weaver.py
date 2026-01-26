@@ -11,6 +11,7 @@
 import inspect
 from typing import Any, Dict, List, Optional, Type, Union
 
+import tiktoken
 from loguru import logger
 from pydantic import BaseModel
 
@@ -128,9 +129,10 @@ class Weaver:
 
     def _estimate_tokens(self, text: str) -> int:
         """
-        Heuristic for estimating tokens (approx. 4 chars per token).
+        Estimate tokens using tiktoken.
         """
-        return len(text) // 4
+        encoding = tiktoken.get_encoding("cl100k_base")
+        return len(encoding.encode(text))
 
     def build(
         self, user_input: str, variables: Optional[Dict[str, Any]] = None, max_tokens: Optional[int] = None
