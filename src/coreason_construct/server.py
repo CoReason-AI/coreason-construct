@@ -1,7 +1,8 @@
 from typing import Any, Dict, List, Optional
 
+import jinja2
 import tiktoken
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from tiktoken import Encoding
 
@@ -64,7 +65,10 @@ async def compile_blueprint(request: BlueprintRequest) -> CompilationResponse:
     for component in request.components:
         weaver.add(component)
 
-    config = weaver.build(user_input=request.user_input, variables=request.variables, max_tokens=request.max_tokens)
+    try:
+        config = weaver.build(user_input=request.user_input, variables=request.variables, max_tokens=request.max_tokens)
+    except jinja2.exceptions.UndefinedError as e:
+        raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}")
 
     encoding = tiktoken.get_encoding("cl100k_base")
     token_count = len(encoding.encode(config.system_message))
