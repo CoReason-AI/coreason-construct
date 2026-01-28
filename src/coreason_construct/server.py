@@ -104,7 +104,7 @@ def get_current_user_context() -> UserContext:
 @app.post("/v1/compile", response_model=CompilationResponse)
 async def compile_blueprint(
     request: BlueprintRequest,
-    context: UserContext = Depends(get_current_user_context)
+    context: UserContext = Depends(get_current_user_context),  # noqa: B008
 ) -> CompilationResponse:
     return server.handle_request(request, context)
 

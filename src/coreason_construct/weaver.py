@@ -49,7 +49,9 @@ class Weaver:
             raise ValueError(f"UserContext is required to resolve dependency '{dep_name}'")
 
         # Use ContextLibrary to retrieve artifact (ensures audit logging)
-        registry_item: Optional[Union[PromptComponent, Type[PromptComponent]]] = ContextLibrary.get_context(dep_name, context)
+        registry_item: Optional[Union[PromptComponent, Type[PromptComponent]]] = ContextLibrary.get_context(
+            dep_name, context
+        )
 
         if not registry_item:
             return None
@@ -147,7 +149,9 @@ class Weaver:
         for component in components:
             self.add(component, context=context)
 
-    def resolve_construct(self, construct_id: str, variables: Dict[str, Any], context: UserContext) -> PromptConfiguration:
+    def resolve_construct(
+        self, construct_id: str, variables: Dict[str, Any], context: UserContext
+    ) -> PromptConfiguration:
         """
         Resolves a construct (builds it).
         Identity-aware: Requires UserContext.
