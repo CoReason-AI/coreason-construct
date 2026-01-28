@@ -17,7 +17,9 @@ from coreason_construct.schemas.base import ComponentType
 from coreason_construct.weaver import Weaver
 
 
-def test_safety_scientist_deduplication(mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_safety_scientist_deduplication(mock_context: UserContext) -> None:
     """
     Edge Case: User manually adds a dependency (HIPAA) before adding
     SafetyScientist (which also depends on HIPAA).
@@ -39,7 +41,7 @@ def test_safety_scientist_deduplication(mock_context) -> None:
     assert any(c.name == "SafetyScientist" for c in weaver.components)
 
 
-def test_safety_scientist_token_resilience(mock_context) -> None:
+def test_safety_scientist_token_resilience(mock_context: UserContext) -> None:
     """
     Complex Scenario: High token pressure.
     SafetyScientist (10) and HIPAA (10) must survive.
@@ -76,7 +78,7 @@ def test_safety_scientist_token_resilience(mock_context) -> None:
     # Since SafetyScientist(10) > GxP(9), GxP would be dropped before SafetyScientist.
 
 
-def test_safety_scientist_missing_dependency(mock_context) -> None:
+def test_safety_scientist_missing_dependency(mock_context: UserContext) -> None:
     """
     Edge Case: A required dependency (GxP) is missing from the registry.
     Expectation: Weaver warns but proceeds; SafetyScientist is added, GxP is not.
@@ -101,7 +103,7 @@ def test_safety_scientist_missing_dependency(mock_context) -> None:
         assert not any(c.name == "GxP" for c in weaver.components)
 
 
-def test_full_pv_workflow_assembly(mock_context) -> None:
+def test_full_pv_workflow_assembly(mock_context: UserContext) -> None:
     """
     Complex Scenario: Full assembly with Role, Dynamic Context, and Task.
     """

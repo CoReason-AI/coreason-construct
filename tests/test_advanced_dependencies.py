@@ -21,7 +21,9 @@ class MockComponentWithDeps(PromptComponent):
         self.dependencies = dependencies
 
 
-def test_transitive_dependencies(mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_transitive_dependencies(mock_context: UserContext) -> None:
     """
     Test chain: RoleA -> ContextB -> ContextC
     Adding RoleA should add ContextB and ContextC.
@@ -49,7 +51,7 @@ def test_transitive_dependencies(mock_context) -> None:
     del CONTEXT_REGISTRY["ContextC"]
 
 
-def test_circular_dependencies(mock_context) -> None:
+def test_circular_dependencies(mock_context: UserContext) -> None:
     """
     Test loop: ContextX -> ContextY -> ContextX
     Adding ContextX should add ContextY and stop without infinite loop.
@@ -76,7 +78,7 @@ def test_circular_dependencies(mock_context) -> None:
     del CONTEXT_REGISTRY["ContextY"]
 
 
-def test_overlapping_dependencies(mock_context) -> None:
+def test_overlapping_dependencies(mock_context: UserContext) -> None:
     """
     Test: RoleA -> [ContextShared]
           RoleB -> [ContextShared]

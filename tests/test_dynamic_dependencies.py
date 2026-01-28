@@ -18,7 +18,9 @@ from coreason_construct.schemas.base import PromptComponent
 from coreason_construct.weaver import Weaver
 
 
-def test_dynamic_dependency_injection(mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_dynamic_dependency_injection(mock_context: UserContext) -> None:
     """
     Test that a Role depending on a dynamic context (PatientHistory)
     is correctly resolved when context_data is provided.
@@ -46,7 +48,7 @@ def test_dynamic_dependency_injection(mock_context) -> None:
     assert "P12345" in patient_history.content
 
 
-def test_dynamic_dependency_missing_data(mock_context) -> None:
+def test_dynamic_dependency_missing_data(mock_context: UserContext) -> None:
     """
     Test that missing context data logs a warning and does not crash,
     and the dependency is NOT added.
@@ -68,7 +70,7 @@ def test_dynamic_dependency_missing_data(mock_context) -> None:
     assert len(patient_history_components) == 0, "PatientHistory should not be added if data is missing"
 
 
-def test_mixed_dependencies(mock_context) -> None:
+def test_mixed_dependencies(mock_context: UserContext) -> None:
     """
     Test that Weaver handles both static (HIPAA) and dynamic (StudyProtocol) dependencies.
     """
@@ -101,7 +103,7 @@ class BrokenComponent(PromptComponent):
         raise ValueError("I am broken")
 
 
-def test_dynamic_dependency_instantiation_failure(capsys: CaptureFixture[Any], mock_context) -> None:
+def test_dynamic_dependency_instantiation_failure(capsys: CaptureFixture[Any], mock_context: UserContext) -> None:
     """
     Test that if instantiation raises an exception, it is caught and logged.
     """

@@ -88,7 +88,9 @@ def registry_cleanup() -> Generator[None, None, None]:
             del CONTEXT_REGISTRY[key]
 
 
-def test_transitive_dynamic_chain(registry_cleanup: Any, mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_transitive_dynamic_chain(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test chain: A -> B(needs val_b) -> C(needs val_c).
     """
@@ -109,7 +111,7 @@ def test_transitive_dynamic_chain(registry_cleanup: Any, mock_context) -> None:
     assert "ChainC_3" in names
 
 
-def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context) -> None:
+def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context: UserContext) -> None:
     """
     Test chain: A -> B(needs val_b) -> C(needs val_c).
     Missing val_c. C should fail. A and B should succeed.
@@ -144,7 +146,7 @@ def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context)
     assert "Cannot instantiate dependency 'ChainC': Missing required context data: ['val_c']" in captured.err
 
 
-def test_circular_dependency_dynamic(registry_cleanup: Any, mock_context) -> None:
+def test_circular_dependency_dynamic(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test CycleA -> CycleB -> CycleA.
     """
@@ -161,7 +163,7 @@ def test_circular_dependency_dynamic(registry_cleanup: Any, mock_context) -> Non
     # If logic was broken, it might recurse infinitely or duplicate entries
 
 
-def test_argument_filtration(registry_cleanup: Any, mock_context) -> None:
+def test_argument_filtration(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test that extra keys in context_data are not passed to __init__
     if it doesn't accept **kwargs.
@@ -183,7 +185,7 @@ def test_argument_filtration(registry_cleanup: Any, mock_context) -> None:
     assert "StrictArgsComp_ok" in names
 
 
-def test_type_handling(registry_cleanup: Any, mock_context) -> None:
+def test_type_handling(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test passing string to int argument.
     """
