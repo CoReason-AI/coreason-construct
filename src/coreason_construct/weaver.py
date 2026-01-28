@@ -15,6 +15,8 @@ import tiktoken
 from loguru import logger
 from pydantic import BaseModel
 
+from coreason_identity.models import UserContext
+from coreason_construct.contexts.library import ContextLibrary
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.primitives.base import StructuredPrimitive
 from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
@@ -37,12 +39,17 @@ class Weaver:
         # Sort by priority (descending), then stable
         return sorted(components, key=lambda c: c.priority, reverse=True)
 
-    def _resolve_dependency(self, dep_name: str) -> Optional[PromptComponent]:
+    def _resolve_dependency(self, dep_name: str, context: Optional[UserContext]) -> Optional[PromptComponent]:
         """
         Resolves a dependency name to a PromptComponent instance.
         Supports both static instances and dynamic class instantiation.
         """
-        registry_item: Optional[Union[PromptComponent, Type[PromptComponent]]] = CONTEXT_REGISTRY.get(dep_name)
+        if not context:
+            # Enforce context as per "Fail Safe" constraint
+            raise ValueError(f"UserContext is required to resolve dependency '{dep_name}'")
+
+        # Use ContextLibrary to retrieve artifact (ensures audit logging)
+        registry_item: Optional[Union[PromptComponent, Type[PromptComponent]]] = ContextLibrary.get_context(dep_name, context)
 
         if not registry_item:
             return None
@@ -87,7 +94,7 @@ class Weaver:
 
         return None
 
-    def add(self, component: PromptComponent) -> "Weaver":
+    def add(self, component: PromptComponent, context: Optional[UserContext] = None) -> "Weaver":
         """
         Add a component to the weaver.
         Handles dependency resolution.
@@ -114,11 +121,11 @@ class Weaver:
                     # But exact name match check is safer if the dynamic component sets a predictable name.
                     # Ideally we resolve it, check its name, then decide.
 
-                    context = self._resolve_dependency(dep_name)
+                    resolved_context = self._resolve_dependency(dep_name, context=context)
 
-                    if context:
+                    if resolved_context:
                         # Recursive call to handle transitive dependencies
-                        self.add(context)
+                        self.add(resolved_context, context=context)
                     else:
                         logger.warning(
                             f"Dependency '{dep_name}' required by '{component.name}' "
@@ -126,6 +133,55 @@ class Weaver:
                         )
 
         return self
+
+    def create_construct(self, name: str, components: List[PromptComponent], context: UserContext) -> None:
+        """
+        Creates a new construct by adding components.
+        Identity-aware: Requires UserContext.
+        """
+        if not context:
+            raise ValueError("UserContext is required for create_construct")
+
+        logger.info(f"Creating construct '{name}'", user_id=context.user_id, name=name)
+
+        for component in components:
+            self.add(component, context=context)
+
+    def resolve_construct(self, construct_id: str, variables: Dict[str, Any], context: UserContext) -> PromptConfiguration:
+        """
+        Resolves a construct (builds it).
+        Identity-aware: Requires UserContext.
+        """
+        if not context:
+            raise ValueError("UserContext is required for resolve_construct")
+
+        logger.info(f"Resolving construct '{construct_id}'", user_id=context.user_id, construct_id=construct_id)
+
+        # In a real system, we might load components by construct_id here.
+        # Since Weaver is stateful in this implementation (components added via create_construct),
+        # we proceed to build using the current state.
+        user_input = variables.get("user_input", "")
+        # Extract max_tokens if present in variables (convention)
+        max_tokens = variables.get("max_tokens")
+        if not isinstance(max_tokens, int):
+            max_tokens = None
+
+        return self.build(user_input=user_input, variables=variables, max_tokens=max_tokens, context=context)
+
+    def visualize_construct(self, construct_id: str, context: UserContext) -> Dict[str, Any]:
+        """
+        Visualizes the construct components.
+        Identity-aware: Requires UserContext.
+        """
+        if not context:
+            raise ValueError("UserContext is required for visualize_construct")
+
+        logger.info(f"Visualizing construct '{construct_id}'", user_id=context.user_id, construct_id=construct_id)
+
+        return {
+            "construct_id": construct_id,
+            "components": [c.model_dump() for c in self.components]
+        }
 
     def _estimate_tokens(self, text: str) -> int:
         """
@@ -135,7 +191,11 @@ class Weaver:
         return len(encoding.encode(text))
 
     def build(
-        self, user_input: str, variables: Optional[Dict[str, Any]] = None, max_tokens: Optional[int] = None
+        self,
+        user_input: str,
+        variables: Optional[Dict[str, Any]] = None,
+        max_tokens: Optional[int] = None,
+        context: Optional[UserContext] = None
     ) -> PromptConfiguration:
         """
         Build the final prompt configuration.
@@ -144,6 +204,7 @@ class Weaver:
             user_input: The input data from the user.
             variables: Optional variables to render components.
             max_tokens: Maximum allowed estimated tokens. If exceeded, low priority components are dropped.
+            context: Optional UserContext (though encouraged).
         """
         if variables is None:
             variables = {}
@@ -167,6 +228,8 @@ class Weaver:
 
             if max_tokens is None or estimated_tokens <= max_tokens:
                 break
+
+            logger.info(f"Optimization loop: estimated={estimated_tokens}, limit={max_tokens}")
 
             # Need to truncate. Find lowest priority component that is not Critical (10).
             # PRD: "truncates 'Low Priority' contexts".
@@ -204,6 +267,9 @@ class Weaver:
             "mode": next((c.name for c in active_components if c.type == ComponentType.MODE), "None"),
             "schema": self._response_model.__name__ if self._response_model else "None",
         }
+
+        if context:
+             metadata["owner_id"] = context.user_id
 
         return PromptConfiguration(
             system_message="\n\n".join(system_parts),

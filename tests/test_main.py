@@ -1,5 +1,77 @@
-from coreason_construct.main import hello_world
+import pytest
+from argparse import Namespace
+from unittest.mock import patch
+from coreason_identity.models import UserContext, SecretStr
+from coreason_construct.main import create_command, resolve_command, visualize_command, get_cli_context, main
+from coreason_construct.schemas.base import PromptComponent, ComponentType
+import json
+import os
+import sys
 
+@pytest.fixture
+def cli_context():
+    return get_cli_context()
 
-def test_hello_world() -> None:
-    assert hello_world() == "Hello World!"
+@pytest.fixture
+def components_file(tmp_path):
+    p = tmp_path / "components.json"
+    comp = PromptComponent(name="TestComp", type=ComponentType.CONTEXT, content="test")
+    p.write_text(json.dumps([comp.model_dump()]))
+    return str(p)
+
+def test_create_command(cli_context, components_file, capsys):
+    args = Namespace(name="test_construct", components_file=components_file)
+    create_command(args, cli_context)
+    captured = capsys.readouterr()
+    assert "Construct 'test_construct' created" in captured.out
+
+def test_create_command_error(cli_context, capsys):
+    args = Namespace(name="test_construct", components_file="non_existent.json")
+    create_command(args, cli_context)
+    captured = capsys.readouterr()
+    assert "Error reading components file" in captured.err
+
+def test_resolve_command(cli_context, capsys):
+    args = Namespace(construct_id="test_construct", variables_file=None)
+    resolve_command(args, cli_context)
+    captured = capsys.readouterr()
+    # Should output config json, check for keys
+    assert "system_message" in captured.out
+
+def test_resolve_command_with_vars(cli_context, tmp_path, capsys):
+    p = tmp_path / "vars.json"
+    p.write_text(json.dumps({"test": "val"}))
+    args = Namespace(construct_id="test_construct", variables_file=str(p))
+    resolve_command(args, cli_context)
+    captured = capsys.readouterr()
+    assert "system_message" in captured.out
+
+def test_resolve_command_error(cli_context, capsys):
+    args = Namespace(construct_id="test_construct", variables_file="non_existent.json")
+    resolve_command(args, cli_context)
+    captured = capsys.readouterr()
+    assert "Error reading variables file" in captured.err
+
+def test_visualize_command(cli_context, capsys):
+    args = Namespace(construct_id="test_construct")
+    visualize_command(args, cli_context)
+    captured = capsys.readouterr()
+    assert "construct_id" in captured.out
+
+def test_main_cli_create(components_file, capsys):
+    with patch("sys.argv", ["main.py", "create", "--name", "test", "--components-file", components_file]):
+        main()
+    captured = capsys.readouterr()
+    assert "Construct 'test' created" in captured.out
+
+def test_main_cli_resolve(capsys):
+    with patch("sys.argv", ["main.py", "resolve", "--construct-id", "test"]):
+        main()
+    captured = capsys.readouterr()
+    assert "system_message" in captured.out
+
+def test_main_cli_visualize(capsys):
+    with patch("sys.argv", ["main.py", "visualize", "--construct-id", "test"]):
+        main()
+    captured = capsys.readouterr()
+    assert "construct_id" in captured.out

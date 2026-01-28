@@ -17,37 +17,37 @@ from coreason_construct.roles.library import Biostatistician, MedicalDirector
 from coreason_construct.weaver import Weaver
 
 
-def test_weaver_auto_dependency_medical_director() -> None:
+def test_weaver_auto_dependency_medical_director(mock_context) -> None:
     """Test that adding MedicalDirector automatically injects HIPAA context."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     # Check if HIPAA context is present
     has_hipaa = any(c.name == "HIPAA" for c in weaver.components)
     assert has_hipaa, "HIPAA context should be automatically injected for MedicalDirector"
 
 
-def test_weaver_no_dependency_biostatistician() -> None:
+def test_weaver_no_dependency_biostatistician(mock_context) -> None:
     """Test that adding Biostatistician does NOT inject HIPAA (unless configured)."""
     weaver = Weaver()
-    weaver.add(Biostatistician)
+    weaver.add(Biostatistician, context=mock_context)
 
     # Check if HIPAA context is NOT present (Biostatistician doesn't have it in dependencies yet)
     has_hipaa = any(c.name == "HIPAA" for c in weaver.components)
     assert not has_hipaa, "HIPAA context should NOT be injected for Biostatistician"
 
 
-def test_weaver_avoid_duplicate_dependencies() -> None:
+def test_weaver_avoid_duplicate_dependencies(mock_context) -> None:
     """Test that dependency is not added twice if explicitly added."""
     weaver = Weaver()
-    weaver.add(HIPAA_Context)
-    weaver.add(MedicalDirector)  # Should verify HIPAA is there, but not add a second copy
+    weaver.add(HIPAA_Context, context=mock_context)
+    weaver.add(MedicalDirector, context=mock_context)  # Should verify HIPAA is there, but not add a second copy
 
     hipaa_count = sum(1 for c in weaver.components if c.name == "HIPAA")
     assert hipaa_count == 1, "HIPAA context should appear only once"
 
 
-def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any]) -> None:
+def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any], mock_context) -> None:
     """Test that a missing dependency logs a warning but doesn't crash."""
     import sys
 
@@ -69,7 +69,7 @@ def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any]) -> None:
     handler_id = logger.add(sys.stderr, level="WARNING")
 
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     # Restore
     MedicalDirector.dependencies = original_deps

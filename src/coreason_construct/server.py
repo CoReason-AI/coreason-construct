@@ -2,12 +2,13 @@ from typing import Any, Dict, List, Optional
 
 import jinja2
 import tiktoken
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel, Field
 from tiktoken import Encoding
 
 from coreason_construct.schemas.base import PromptComponent
 from coreason_construct.weaver import Weaver
+from coreason_identity.models import UserContext, SecretStr
 
 app = FastAPI(title="Coreason Construct Compiler", version="1.0.0")
 
@@ -57,23 +58,55 @@ def prune_middle(text: str, limit: int, encoding: Encoding) -> str:
     decoded: str = encoding.decode(start_tokens + end_tokens)
     return decoded
 
+class ConstructServer:
+    def handle_request(self, request: BlueprintRequest, context: UserContext) -> CompilationResponse:
+        weaver = Weaver(context_data=request.variables)
+
+        # Use identity-aware methods
+        weaver.create_construct(name="request_construct", components=request.components, context=context)
+
+        # Prepare variables to include user_input if needed by resolve_construct logic
+        resolve_vars = request.variables.copy()
+        if "user_input" not in resolve_vars:
+            resolve_vars["user_input"] = request.user_input
+
+        # Inject max_tokens into variables so resolve_construct can pick it up
+        if request.max_tokens is not None:
+            resolve_vars["max_tokens"] = request.max_tokens
+
+        try:
+            config = weaver.resolve_construct(
+                construct_id="request_construct",
+                variables=resolve_vars,
+                context=context
+            )
+        except jinja2.exceptions.UndefinedError as e:
+            raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}") from e
+
+        encoding = tiktoken.get_encoding("cl100k_base")
+        token_count = len(encoding.encode(config.system_message))
+
+        return CompilationResponse(system_prompt=config.system_message, token_count=token_count, warnings=[])
+
+server = ConstructServer()
+
+def get_current_user_context() -> UserContext:
+    # In a real app, this would parse headers/tokens.
+    # For now, we simulate a default user.
+    return UserContext(
+        user_id="http-user",
+        email="http@coreason.ai",
+        groups=["http"],
+        scopes=[],
+        claims={"source": "http"}
+    )
 
 @app.post("/v1/compile", response_model=CompilationResponse)
-async def compile_blueprint(request: BlueprintRequest) -> CompilationResponse:
-    weaver = Weaver(context_data=request.variables)
-
-    for component in request.components:
-        weaver.add(component)
-
-    try:
-        config = weaver.build(user_input=request.user_input, variables=request.variables, max_tokens=request.max_tokens)
-    except jinja2.exceptions.UndefinedError as e:
-        raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}") from e
-
-    encoding = tiktoken.get_encoding("cl100k_base")
-    token_count = len(encoding.encode(config.system_message))
-
-    return CompilationResponse(system_prompt=config.system_message, token_count=token_count, warnings=[])
+async def compile_blueprint(
+    request: BlueprintRequest,
+    context: UserContext = Depends(get_current_user_context)
+) -> CompilationResponse:
+    return server.handle_request(request, context)
 
 
 @app.post("/v1/optimize", response_model=OptimizationResponse)

@@ -17,7 +17,7 @@ from coreason_construct.schemas.base import ComponentType
 from coreason_construct.weaver import Weaver
 
 
-def test_safety_scientist_deduplication() -> None:
+def test_safety_scientist_deduplication(mock_context) -> None:
     """
     Edge Case: User manually adds a dependency (HIPAA) before adding
     SafetyScientist (which also depends on HIPAA).
@@ -26,10 +26,10 @@ def test_safety_scientist_deduplication() -> None:
     weaver = Weaver()
 
     # 1. Manually add HIPAA
-    weaver.add(HIPAA_Context)
+    weaver.add(HIPAA_Context, context=mock_context)
 
     # 2. Add SafetyScientist (triggering auto-injection of HIPAA)
-    weaver.add(SafetyScientist)
+    weaver.add(SafetyScientist, context=mock_context)
 
     # Check counts
     hipaa_count = sum(1 for c in weaver.components if c.name == "HIPAA")
@@ -39,7 +39,7 @@ def test_safety_scientist_deduplication() -> None:
     assert any(c.name == "SafetyScientist" for c in weaver.components)
 
 
-def test_safety_scientist_token_resilience() -> None:
+def test_safety_scientist_token_resilience(mock_context) -> None:
     """
     Complex Scenario: High token pressure.
     SafetyScientist (10) and HIPAA (10) must survive.
@@ -47,14 +47,14 @@ def test_safety_scientist_token_resilience() -> None:
     Low priority data (e.g. priority 1) should be dropped first.
     """
     weaver = Weaver()
-    weaver.add(SafetyScientist)  # Adds HIPAA(10), GxP(9)
+    weaver.add(SafetyScientist, context=mock_context)  # Adds HIPAA(10), GxP(9)
 
     # Add a low priority massive component
     from coreason_construct.schemas.base import PromptComponent
 
     massive_content = "x" * 1000
     low_prio = PromptComponent(name="LowPrioJunk", type=ComponentType.DATA, content=massive_content, priority=1)
-    weaver.add(low_prio)
+    weaver.add(low_prio, context=mock_context)
 
     # SafetyScientist content ~300 chars? HIPAA ~200? GxP ~150?
     # Total essentials < 1000 chars.
@@ -63,7 +63,7 @@ def test_safety_scientist_token_resilience() -> None:
     # Weaver estimates 4 chars/token.
     # Let's say we allow 300 tokens (1200 chars).
 
-    config = weaver.build(user_input="Test", max_tokens=300)
+    config = weaver.build(user_input="Test", max_tokens=300, context=mock_context)
 
     # Verify LowPrioJunk is gone
     assert "LowPrioJunk" not in config.system_message
@@ -76,7 +76,7 @@ def test_safety_scientist_token_resilience() -> None:
     # Since SafetyScientist(10) > GxP(9), GxP would be dropped before SafetyScientist.
 
 
-def test_safety_scientist_missing_dependency() -> None:
+def test_safety_scientist_missing_dependency(mock_context) -> None:
     """
     Edge Case: A required dependency (GxP) is missing from the registry.
     Expectation: Weaver warns but proceeds; SafetyScientist is added, GxP is not.
@@ -86,9 +86,10 @@ def test_safety_scientist_missing_dependency() -> None:
     if "GxP" in mock_registry:
         del mock_registry["GxP"]
 
-    with patch("coreason_construct.weaver.CONTEXT_REGISTRY", mock_registry):
+    # Patch the registry where ContextLibrary finds it
+    with patch("coreason_construct.contexts.registry.CONTEXT_REGISTRY", mock_registry):
         weaver = Weaver()
-        weaver.add(SafetyScientist)
+        weaver.add(SafetyScientist, context=mock_context)
 
         # SafetyScientist should be added
         assert any(c.name == "SafetyScientist" for c in weaver.components)
@@ -100,24 +101,24 @@ def test_safety_scientist_missing_dependency() -> None:
         assert not any(c.name == "GxP" for c in weaver.components)
 
 
-def test_full_pv_workflow_assembly() -> None:
+def test_full_pv_workflow_assembly(mock_context) -> None:
     """
     Complex Scenario: Full assembly with Role, Dynamic Context, and Task.
     """
     weaver = Weaver(context_data={"patient_id": "PT-001"})
 
     # 1. Add Role
-    weaver.add(SafetyScientist)
+    weaver.add(SafetyScientist, context=mock_context)
 
     # 2. Add Dynamic Context
     # Weaver resolves "PatientHistory" from registry using context_data
     # Note: resolving via name string requires it to be in registry
     patient_history = CONTEXT_REGISTRY["PatientHistory"](patient_id="PT-001")  # type: ignore
-    weaver.add(patient_history)
+    weaver.add(patient_history, context=mock_context)
 
     # 3. Build Prompt
     user_input = "Patient experienced nausea."
-    config = weaver.build(user_input)
+    config = weaver.build(user_input, context=mock_context)
 
     system_msg = config.system_message
 

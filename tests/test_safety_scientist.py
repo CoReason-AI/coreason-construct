@@ -12,13 +12,13 @@ from coreason_construct.roles.library import SafetyScientist
 from coreason_construct.weaver import Weaver
 
 
-def test_safety_scientist_dependency_injection() -> None:
+def test_safety_scientist_dependency_injection(mock_context) -> None:
     """
     Test that adding the SafetyScientist role to the Weaver
     automatically injects its dependencies (HIPAA, GxP).
     """
     weaver = Weaver()
-    weaver.add(SafetyScientist)
+    weaver.add(SafetyScientist, context=mock_context)
 
     # Check that SafetyScientist is present
     assert any(c.name == "SafetyScientist" for c in weaver.components)

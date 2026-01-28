@@ -15,25 +15,25 @@ from coreason_construct.schemas.primitives import Summary
 from coreason_construct.weaver import Weaver
 
 
-def test_weaver_dependency_resolution() -> None:
+def test_weaver_dependency_resolution(mock_context) -> None:
     """Test that MedicalDirector role triggers HIPAA context injection."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     component_names = [c.name for c in weaver.components]
     assert "MedicalDirector" in component_names
     assert "HIPAA" in component_names
 
 
-def test_weaver_build_flow() -> None:
+def test_weaver_build_flow(mock_context) -> None:
     """Test the full build flow with multiple components."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
-    weaver.add(GxP_Context)
+    weaver.add(MedicalDirector, context=mock_context)
+    weaver.add(GxP_Context, context=mock_context)
     primitive = SummarizationPrimitive()
-    weaver.add(primitive)
+    weaver.add(primitive, context=mock_context)
 
-    config = weaver.build(user_input="Patient X has diabetes.", variables={})
+    config = weaver.build(user_input="Patient X has diabetes.", variables={}, context=mock_context)
 
     # Check System Message
     assert "You are a Medical Director" in config.system_message
@@ -53,13 +53,13 @@ def test_weaver_build_flow() -> None:
     assert config.provenance_metadata["schema"] == "Summary"
 
 
-def test_weaver_sorting() -> None:
+def test_weaver_sorting(mock_context) -> None:
     """Test that components are sorted by priority."""
     weaver = Weaver()
 
     # Add in random order
-    weaver.add(GxP_Context)  # Priority 9
-    weaver.add(MedicalDirector)  # Priority 10
+    weaver.add(GxP_Context, context=mock_context)  # Priority 9
+    weaver.add(MedicalDirector, context=mock_context)  # Priority 10
 
     # HIPAA (Priority 10) is auto-added by MedicalDirector
 
@@ -88,14 +88,14 @@ def test_weaver_build_defaults() -> None:
     assert config.user_message == "Test input"
 
 
-def test_weaver_duplicate_add_early_exit() -> None:
+def test_weaver_duplicate_add_early_exit(mock_context) -> None:
     """Test that adding the same component twice returns early."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     initial_count = len(weaver.components)
 
     # Add again
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     assert len(weaver.components) == initial_count
