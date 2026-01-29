@@ -14,7 +14,9 @@ from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
 
 
-def test_weaver_integration_ae_examples(mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_weaver_integration_ae_examples(mock_context: UserContext) -> None:
     """
     Test full assembly with SafetyScientist and AE_Examples.
     """
@@ -34,7 +36,7 @@ def test_weaver_integration_ae_examples(mock_context) -> None:
     assert "'term': 'Nausea'" in system_msg
 
 
-def test_mixed_rendering_variables(mock_context) -> None:
+def test_mixed_rendering_variables(mock_context: UserContext) -> None:
     """
     Test scenario where some components need variables and AE_Examples (with braces) does not.
     This ensures the render override correctly isolates AE_Examples from variable injection.

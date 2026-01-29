@@ -22,14 +22,14 @@ def test_weaver_identity_enforcement(mock_context: UserContext) -> None:
 
     # create_construct requires context
     with pytest.raises(ValueError, match="UserContext is required"):
-        weaver.create_construct("test", [component], context=None)  # type: ignore
+        weaver.create_construct("test", [component], context=None)
 
     # Should succeed with context
     weaver.create_construct("test", [component], context=mock_context)
 
     # resolve_construct requires context
     with pytest.raises(ValueError, match="UserContext is required"):
-        weaver.resolve_construct("test", {}, context=None)  # type: ignore
+        weaver.resolve_construct("test", {}, context=None)
 
     # Should succeed with context
     config = weaver.resolve_construct("test", {}, context=mock_context)
@@ -39,13 +39,13 @@ def test_context_library_identity_enforcement(mock_context: UserContext) -> None
     # register_context
     component = PromptComponent(name="TestCtx", type=ComponentType.CONTEXT, content="test")
     with pytest.raises(ValueError, match="UserContext is required"):
-        ContextLibrary.register_context("TestCtx", component, context=None)  # type: ignore
+        ContextLibrary.register_context("TestCtx", component, context=None)
 
     ContextLibrary.register_context("TestCtx", component, context=mock_context)
 
     # get_context
     with pytest.raises(ValueError, match="UserContext is required"):
-        ContextLibrary.get_context("TestCtx", context=None)  # type: ignore
+        ContextLibrary.get_context("TestCtx", context=None)
 
     ctx = ContextLibrary.get_context("TestCtx", context=mock_context)
     assert ctx.name == "TestCtx"
@@ -54,13 +54,13 @@ def test_context_library_identity_enforcement(mock_context: UserContext) -> None
 def test_role_library_identity_enforcement(mock_context: UserContext) -> None:
     # register_role
     with pytest.raises(ValueError, match="UserContext is required"):
-        RoleLibrary.register_role("NewRole", MedicalDirector, context=None)  # type: ignore
+        RoleLibrary.register_role("NewRole", MedicalDirector, context=None)
 
     RoleLibrary.register_role("NewRole", MedicalDirector, context=mock_context)
 
     # get_role
     with pytest.raises(ValueError, match="UserContext is required"):
-        RoleLibrary.get_role("NewRole", context=None)  # type: ignore
+        RoleLibrary.get_role("NewRole", context=None)
 
     role = RoleLibrary.get_role("NewRole", context=mock_context)
     assert role is not None

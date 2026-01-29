@@ -47,7 +47,9 @@ def test_weaver_avoid_duplicate_dependencies(mock_context) -> None:
     assert hipaa_count == 1, "HIPAA context should appear only once"
 
 
-def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any], mock_context) -> None:
+from coreason_identity.models import UserContext
+
+def test_weaver_missing_dependency_warning(capsys: CaptureFixture[Any], mock_context: UserContext) -> None:
     """Test that a missing dependency logs a warning but doesn't crash."""
     import sys
 

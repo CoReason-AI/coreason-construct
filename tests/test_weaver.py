@@ -120,4 +120,4 @@ def test_visualize_construct(mock_context: UserContext) -> None:
 def test_visualize_construct_error() -> None:
     weaver = Weaver()
     with pytest.raises(ValueError, match="UserContext is required"):
-        weaver.visualize_construct("test", context=None)  # type: ignore
+        weaver.visualize_construct("test", context=None)
