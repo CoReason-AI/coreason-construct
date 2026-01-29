@@ -11,7 +11,7 @@
 from typing import Any, Generator, List, Optional
 
 import pytest
-from loguru import logger
+from coreason_identity.models import UserContext
 
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
@@ -88,7 +88,7 @@ def registry_cleanup() -> Generator[None, None, None]:
             del CONTEXT_REGISTRY[key]
 
 
-def test_transitive_dynamic_chain(registry_cleanup: Any) -> None:
+def test_transitive_dynamic_chain(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test chain: A -> B(needs val_b) -> C(needs val_c).
     """
@@ -100,7 +100,7 @@ def test_transitive_dynamic_chain(registry_cleanup: Any) -> None:
 
     # Instantiate A manually
     root = ChainA(val_a="1")
-    weaver.add(root)
+    weaver.add(root, context=mock_context)
 
     # Check presence
     names = [c.name for c in weaver.components]
@@ -109,12 +109,14 @@ def test_transitive_dynamic_chain(registry_cleanup: Any) -> None:
     assert "ChainC_3" in names
 
 
-def test_partial_chain_failure(registry_cleanup: Any, capsys: Any) -> None:
+def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context: UserContext) -> None:
     """
     Test chain: A -> B(needs val_b) -> C(needs val_c).
     Missing val_c. C should fail. A and B should succeed.
     """
     import sys
+
+    from loguru import logger
 
     # Reconfigure logger to ensure we catch the output
     # Note: Weaver uses loguru directly
@@ -130,7 +132,7 @@ def test_partial_chain_failure(registry_cleanup: Any, capsys: Any) -> None:
     weaver = Weaver(context_data={"val_a": "1", "val_b": "2"})
 
     root = ChainA(val_a="1")
-    weaver.add(root)
+    weaver.add(root, context=mock_context)
 
     logger.remove(handler_id)
 
@@ -144,7 +146,7 @@ def test_partial_chain_failure(registry_cleanup: Any, capsys: Any) -> None:
     assert "Cannot instantiate dependency 'ChainC': Missing required context data: ['val_c']" in captured.err
 
 
-def test_circular_dependency_dynamic(registry_cleanup: Any) -> None:
+def test_circular_dependency_dynamic(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test CycleA -> CycleB -> CycleA.
     """
@@ -154,14 +156,14 @@ def test_circular_dependency_dynamic(registry_cleanup: Any) -> None:
     weaver = Weaver(context_data={"val": "cyc"})
 
     root = CycleA(val="cyc")
-    weaver.add(root)
+    weaver.add(root, context=mock_context)
 
     names = sorted([c.name for c in weaver.components])
     assert names == ["CycleA_cyc", "CycleB_cyc"]
     # If logic was broken, it might recurse infinitely or duplicate entries
 
 
-def test_argument_filtration(registry_cleanup: Any) -> None:
+def test_argument_filtration(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test that extra keys in context_data are not passed to __init__
     if it doesn't accept **kwargs.
@@ -177,13 +179,13 @@ def test_argument_filtration(registry_cleanup: Any) -> None:
             super().__init__(name_suffix="root", content_val="root", deps=["StrictArgsComp"])
 
     root = DepOnStrict()
-    weaver.add(root)
+    weaver.add(root, context=mock_context)
 
     names = [c.name for c in weaver.components]
     assert "StrictArgsComp_ok" in names
 
 
-def test_type_handling(registry_cleanup: Any) -> None:
+def test_type_handling(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test passing string to int argument.
     """
@@ -197,7 +199,7 @@ def test_type_handling(registry_cleanup: Any) -> None:
             super().__init__(name_suffix="root", content_val="root", deps=["TypeCheckComp"])
 
     root = DepOnType()
-    weaver.add(root)
+    weaver.add(root, context=mock_context)
 
     comp = next(c for c in weaver.components if c.name == "TypeCheckComp_5")
     # Verify what type it received

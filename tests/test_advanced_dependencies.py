@@ -8,6 +8,8 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
@@ -21,7 +23,7 @@ class MockComponentWithDeps(PromptComponent):
         self.dependencies = dependencies
 
 
-def test_transitive_dependencies() -> None:
+def test_transitive_dependencies(mock_context: UserContext) -> None:
     """
     Test chain: RoleA -> ContextB -> ContextC
     Adding RoleA should add ContextB and ContextC.
@@ -37,7 +39,7 @@ def test_transitive_dependencies() -> None:
 
     # Test
     weaver = Weaver()
-    weaver.add(role_a)
+    weaver.add(role_a, context=mock_context)
 
     component_names = {c.name for c in weaver.components}
     assert "RoleA" in component_names
@@ -49,7 +51,7 @@ def test_transitive_dependencies() -> None:
     del CONTEXT_REGISTRY["ContextC"]
 
 
-def test_circular_dependencies() -> None:
+def test_circular_dependencies(mock_context: UserContext) -> None:
     """
     Test loop: ContextX -> ContextY -> ContextX
     Adding ContextX should add ContextY and stop without infinite loop.
@@ -64,7 +66,7 @@ def test_circular_dependencies() -> None:
 
     # Test
     weaver = Weaver()
-    weaver.add(context_x)
+    weaver.add(context_x, context=mock_context)
 
     component_names = {c.name for c in weaver.components}
     assert "ContextX" in component_names
@@ -76,7 +78,7 @@ def test_circular_dependencies() -> None:
     del CONTEXT_REGISTRY["ContextY"]
 
 
-def test_overlapping_dependencies() -> None:
+def test_overlapping_dependencies(mock_context: UserContext) -> None:
     """
     Test: RoleA -> [ContextShared]
           RoleB -> [ContextShared]
@@ -92,8 +94,8 @@ def test_overlapping_dependencies() -> None:
 
     # Test
     weaver = Weaver()
-    weaver.add(role_a)
-    weaver.add(role_b)
+    weaver.add(role_a, context=mock_context)
+    weaver.add(role_b, context=mock_context)
 
     component_names = {c.name for c in weaver.components}
     assert "RoleA" in component_names

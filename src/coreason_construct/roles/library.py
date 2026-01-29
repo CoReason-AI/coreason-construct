@@ -8,7 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from typing import Optional
+
+from coreason_identity.models import UserContext
+from loguru import logger
+
 from coreason_construct.roles.base import RoleDefinition
+from coreason_construct.roles.registry import ROLE_REGISTRY
 
 MedicalDirector = RoleDefinition(
     name="MedicalDirector",
@@ -59,3 +65,24 @@ SafetyScientist = RoleDefinition(
     dependencies=["HIPAA", "GxP"],
     priority=10,
 )
+
+# Populate Registry
+ROLE_REGISTRY["MedicalDirector"] = MedicalDirector
+ROLE_REGISTRY["Biostatistician"] = Biostatistician
+ROLE_REGISTRY["SafetyScientist"] = SafetyScientist
+
+
+class RoleLibrary:
+    @staticmethod
+    def register_role(name: str, role: RoleDefinition, context: UserContext) -> None:
+        if not context:
+            raise ValueError("UserContext is required")
+        logger.debug("Registering artifact", user_id=context.user_id, type="role", name=name)
+        ROLE_REGISTRY[name] = role
+
+    @staticmethod
+    def get_role(name: str, context: UserContext) -> Optional[RoleDefinition]:
+        if not context:
+            raise ValueError("UserContext is required")
+        # In a real system we might check access here or log access
+        return ROLE_REGISTRY.get(name)

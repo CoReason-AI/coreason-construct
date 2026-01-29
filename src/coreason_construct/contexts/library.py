@@ -10,6 +10,9 @@
 
 from typing import Any
 
+from coreason_identity.models import UserContext
+from loguru import logger
+
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 
 
@@ -68,3 +71,23 @@ GxP_Context = create_static_context(
     ),
     priority=9,
 )
+
+
+class ContextLibrary:
+    @staticmethod
+    def register_context(name: str, component: Any, context: UserContext) -> None:
+        from coreason_construct.contexts.registry import CONTEXT_REGISTRY
+
+        if not context:
+            raise ValueError("UserContext is required")
+        logger.debug("Registering artifact", user_id=context.user_id, type="context", name=name)
+        CONTEXT_REGISTRY[name] = component
+
+    @staticmethod
+    def get_context(name: str, context: UserContext) -> Any:
+        from coreason_construct.contexts.registry import CONTEXT_REGISTRY
+
+        if not context:
+            raise ValueError("UserContext is required")
+        # In a real system we might check access here
+        return CONTEXT_REGISTRY.get(name)

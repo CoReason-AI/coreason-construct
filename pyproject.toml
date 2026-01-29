@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coreason_construct"
-version = "0.3.0"
+version = "0.4.0"
 description = "coreason-construct"
 authors = ["Gowtham A Rao <gowtham.rao@coreason.ai>"]
 license = "Prosperity-3.0"
@@ -16,6 +16,8 @@ jinja2 = "^3.1.0"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 tiktoken = "*"
+coreason-identity = "^0.4.1"
+anyio = "^4.12.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
@@ -33,7 +35,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "coreason_construct"
-version = "0.3.0"
+version = "0.4.0"
 description = "coreason-construct"
 readme = "README.md"
 requires-python = ">=3.11"
