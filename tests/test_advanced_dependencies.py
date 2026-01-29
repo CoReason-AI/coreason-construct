@@ -8,10 +8,10 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
-from coreason_construct.contexts.registry import CONTEXT_REGISTRY
-from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_identity.models import UserContext
 
+from coreason_construct.contexts.registry import CONTEXT_REGISTRY
+from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
 
 
@@ -22,8 +22,6 @@ class MockComponentWithDeps(PromptComponent):
         super().__init__(name=name, type=ComponentType.CONTEXT, content=f"Content for {name}")
         self.dependencies = dependencies
 
-
-from coreason_identity.models import UserContext
 
 def test_transitive_dependencies(mock_context: UserContext) -> None:
     """

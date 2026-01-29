@@ -107,7 +107,7 @@ def test_weaver_missing_context_dependency_error() -> None:
     """Test that resolving dependencies without context raises ValueError."""
     weaver = Weaver()
     with pytest.raises(ValueError, match="UserContext is required"):
-        weaver.add(MedicalDirector)  # Requires resolving HIPAA dependency
+        weaver.add(MedicalDirector)  # type: ignore
 
 def test_visualize_construct(mock_context: UserContext) -> None:
     """Test visualize_construct logic and logging."""

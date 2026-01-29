@@ -13,6 +13,8 @@ from typing import Any, Generator, List, Optional
 import pytest
 from loguru import logger
 
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
@@ -74,9 +76,6 @@ class TypeCheckComp(BaseDynamicComp):
         if not isinstance(count, int):
             # Just to verify what we received
             self.content += f" (Type: {type(count).__name__})"
-
-
-from coreason_identity.models import UserContext
 
 
 @pytest.fixture
