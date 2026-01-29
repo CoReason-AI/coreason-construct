@@ -11,7 +11,7 @@
 from typing import Any, Generator, List, Optional
 
 import pytest
-from loguru import logger
+from coreason_identity.models import UserContext
 
 from coreason_identity.models import UserContext
 
@@ -90,8 +90,6 @@ def registry_cleanup() -> Generator[None, None, None]:
             del CONTEXT_REGISTRY[key]
 
 
-from coreason_identity.models import UserContext
-
 def test_transitive_dynamic_chain(registry_cleanup: Any, mock_context: UserContext) -> None:
     """
     Test chain: A -> B(needs val_b) -> C(needs val_c).
@@ -119,6 +117,7 @@ def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context:
     Missing val_c. C should fail. A and B should succeed.
     """
     import sys
+    from loguru import logger
 
     # Reconfigure logger to ensure we catch the output
     # Note: Weaver uses loguru directly
