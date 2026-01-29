@@ -10,6 +10,7 @@
 
 from typing import Any
 
+from coreason_identity.models import UserContext
 from pytest import CaptureFixture
 
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
@@ -18,7 +19,7 @@ from coreason_construct.schemas.base import PromptComponent
 from coreason_construct.weaver import Weaver
 
 
-def test_dynamic_dependency_injection() -> None:
+def test_dynamic_dependency_injection(mock_context: UserContext) -> None:
     """
     Test that a Role depending on a dynamic context (PatientHistory)
     is correctly resolved when context_data is provided.
@@ -36,7 +37,7 @@ def test_dynamic_dependency_injection() -> None:
     weaver = Weaver(context_data={"patient_id": "P12345"})
 
     # 3. Add the Role
-    weaver.add(DoctorRole)
+    weaver.add(DoctorRole, context=mock_context)
 
     # 4. Verify that PatientHistory_P12345 was added
     # The name is dynamically generated as "PatientHistory_{patient_id}"
@@ -46,7 +47,7 @@ def test_dynamic_dependency_injection() -> None:
     assert "P12345" in patient_history.content
 
 
-def test_dynamic_dependency_missing_data() -> None:
+def test_dynamic_dependency_missing_data(mock_context: UserContext) -> None:
     """
     Test that missing context data logs a warning and does not crash,
     and the dependency is NOT added.
@@ -61,14 +62,14 @@ def test_dynamic_dependency_missing_data() -> None:
 
     # No patient_id provided
     weaver = Weaver(context_data={})
-    weaver.add(DoctorRole)
+    weaver.add(DoctorRole, context=mock_context)
 
     # Verify PatientHistory is NOT added
     patient_history_components = [c for c in weaver.components if c.name.startswith("PatientHistory")]
     assert len(patient_history_components) == 0, "PatientHistory should not be added if data is missing"
 
 
-def test_mixed_dependencies() -> None:
+def test_mixed_dependencies(mock_context: UserContext) -> None:
     """
     Test that Weaver handles both static (HIPAA) and dynamic (StudyProtocol) dependencies.
     """
@@ -82,7 +83,7 @@ def test_mixed_dependencies() -> None:
     )
 
     weaver = Weaver(context_data={"nct_id": "NCT0001"})
-    weaver.add(LeadInvestigator)
+    weaver.add(LeadInvestigator, context=mock_context)
 
     # Check HIPAA (static)
     has_hipaa = any(c.name == "HIPAA" for c in weaver.components)
@@ -101,7 +102,7 @@ class BrokenComponent(PromptComponent):
         raise ValueError("I am broken")
 
 
-def test_dynamic_dependency_instantiation_failure(capsys: CaptureFixture[Any]) -> None:
+def test_dynamic_dependency_instantiation_failure(capsys: CaptureFixture[Any], mock_context: UserContext) -> None:
     """
     Test that if instantiation raises an exception, it is caught and logged.
     """
@@ -117,7 +118,7 @@ def test_dynamic_dependency_instantiation_failure(capsys: CaptureFixture[Any]) -
 
     # 3. Call _resolve_dependency directly
     weaver = Weaver()
-    result = weaver._resolve_dependency("BrokenComp")
+    result = weaver._resolve_dependency("BrokenComp", context=mock_context)
 
     # 4. Cleanup
     del CONTEXT_REGISTRY["BrokenComp"]
