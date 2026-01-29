@@ -11,12 +11,9 @@ from coreason_construct.weaver import Weaver
 @pytest.fixture
 def mock_context() -> UserContext:
     return UserContext(
-        user_id="test-user",
-        email="test@coreason.ai",
-        groups=["tester"],
-        scopes=[],
-        claims={"source": "test"}
+        user_id="test-user", email="test@coreason.ai", groups=["tester"], scopes=[], claims={"source": "test"}
     )
+
 
 def test_weaver_identity_enforcement(mock_context: UserContext) -> None:
     weaver = Weaver()
@@ -36,6 +33,7 @@ def test_weaver_identity_enforcement(mock_context: UserContext) -> None:
     # Should succeed with context
     config = weaver.resolve_construct("test", {}, context=mock_context)
     assert config.provenance_metadata.get("owner_id") == "test-user"
+
 
 def test_context_library_identity_enforcement(mock_context: UserContext) -> None:
     # register_context
@@ -68,12 +66,10 @@ def test_role_library_identity_enforcement(mock_context: UserContext) -> None:
     assert role is not None
     assert role.name == "MedicalDirector"
 
+
 def test_server_identity_enforcement(mock_context: UserContext) -> None:
     component = PromptComponent(name="TestComp", type=ComponentType.CONTEXT, content="test")
-    request = BlueprintRequest(
-        user_input="hello",
-        components=[component]
-    )
+    request = BlueprintRequest(user_input="hello", components=[component])
 
     # Handle request with context
     response = server.handle_request(request, context=mock_context)

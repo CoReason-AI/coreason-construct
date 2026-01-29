@@ -181,10 +181,7 @@ class Weaver:
 
         logger.info(f"Visualizing construct '{construct_id}'", user_id=context.user_id, construct_id=construct_id)
 
-        return {
-            "construct_id": construct_id,
-            "components": [c.model_dump() for c in self.components]
-        }
+        return {"construct_id": construct_id, "components": [c.model_dump() for c in self.components]}
 
     def _estimate_tokens(self, text: str) -> int:
         """
@@ -198,7 +195,7 @@ class Weaver:
         user_input: str,
         variables: Optional[Dict[str, Any]] = None,
         max_tokens: Optional[int] = None,
-        context: Optional[UserContext] = None
+        context: Optional[UserContext] = None,
     ) -> PromptConfiguration:
         """
         Build the final prompt configuration.
@@ -272,7 +269,7 @@ class Weaver:
         }
 
         if context:
-             metadata["owner_id"] = context.user_id
+            metadata["owner_id"] = context.user_id
 
         return PromptConfiguration(
             system_message="\n\n".join(system_parts),

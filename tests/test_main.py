@@ -19,6 +19,7 @@ def components_file(tmp_path: object) -> str:
     # mypy might complain about tmp_path if not typed correctly as pytest specific
     # but usually 'object' or 'Any' is fine if we don't import pytest's types
     from pathlib import Path
+
     assert isinstance(tmp_path, Path)
     p = tmp_path / "components.json"
     comp = PromptComponent(name="TestComp", type=ComponentType.CONTEXT, content="test")

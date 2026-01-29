@@ -58,6 +58,7 @@ def prune_middle(text: str, limit: int, encoding: Encoding) -> str:
     decoded: str = encoding.decode(start_tokens + end_tokens)
     return decoded
 
+
 class ConstructServer:
     def handle_request(self, request: BlueprintRequest, context: UserContext) -> CompilationResponse:
         weaver = Weaver(context_data=request.variables)
@@ -75,11 +76,7 @@ class ConstructServer:
             resolve_vars["max_tokens"] = request.max_tokens
 
         try:
-            config = weaver.resolve_construct(
-                construct_id="request_construct",
-                variables=resolve_vars,
-                context=context
-            )
+            config = weaver.resolve_construct(construct_id="request_construct", variables=resolve_vars, context=context)
         except jinja2.exceptions.UndefinedError as e:
             raise HTTPException(status_code=400, detail=f"Missing variable in template: {e}") from e
 
@@ -88,18 +85,17 @@ class ConstructServer:
 
         return CompilationResponse(system_prompt=config.system_message, token_count=token_count, warnings=[])
 
+
 server = ConstructServer()
+
 
 def get_current_user_context() -> UserContext:
     # In a real app, this would parse headers/tokens.
     # For now, we simulate a default user.
     return UserContext(
-        user_id="http-user",
-        email="http@coreason.ai",
-        groups=["http"],
-        scopes=[],
-        claims={"source": "http"}
+        user_id="http-user", email="http@coreason.ai", groups=["http"], scopes=[], claims={"source": "http"}
     )
+
 
 @app.post("/v1/compile", response_model=CompilationResponse)
 async def compile_blueprint(

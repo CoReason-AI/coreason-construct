@@ -103,11 +103,13 @@ def test_weaver_duplicate_add_early_exit(mock_context: UserContext) -> None:
 
     assert len(weaver.components) == initial_count
 
+
 def test_weaver_missing_context_dependency_error() -> None:
     """Test that resolving dependencies without context raises ValueError."""
     weaver = Weaver()
     with pytest.raises(ValueError, match="UserContext is required"):
         weaver.add(MedicalDirector)
+
 
 def test_visualize_construct(mock_context: UserContext) -> None:
     """Test visualize_construct logic and logging."""
@@ -116,6 +118,7 @@ def test_visualize_construct(mock_context: UserContext) -> None:
     result = weaver.visualize_construct("test_viz", context=mock_context)
     assert result["construct_id"] == "test_viz"
     assert len(result["components"]) >= 2  # Role + Dep
+
 
 def test_visualize_construct_error() -> None:
     weaver = Weaver()

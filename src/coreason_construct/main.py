@@ -20,16 +20,13 @@ from coreason_construct.weaver import Weaver
 
 def get_cli_context() -> UserContext:
     return UserContext(
-        user_id="cli-user",
-        email="cli@coreason.ai",
-        groups=["system"],
-        scopes=[],
-        claims={"source": "cli"}
+        user_id="cli-user", email="cli@coreason.ai", groups=["system"], scopes=[], claims={"source": "cli"}
     )
+
 
 def create_command(args: argparse.Namespace, context: UserContext) -> None:
     try:
-        with open(args.components_file, 'r') as f:
+        with open(args.components_file, "r") as f:
             data = json.load(f)
             # Assuming data is list of components
             components = [PromptComponent(**c) for c in data]
@@ -41,6 +38,7 @@ def create_command(args: argparse.Namespace, context: UserContext) -> None:
     weaver.create_construct(args.name, components, context)
     print(f"Construct '{args.name}' created.")
 
+
 def resolve_command(args: argparse.Namespace, context: UserContext) -> None:
     weaver = Weaver()
     # In a persistent system, we would load the construct here.
@@ -50,7 +48,7 @@ def resolve_command(args: argparse.Namespace, context: UserContext) -> None:
     variables = {}
     if args.variables_file:
         try:
-            with open(args.variables_file, 'r') as f:
+            with open(args.variables_file, "r") as f:
                 variables = json.load(f)
         except Exception as e:
             print(f"Error reading variables file: {e}", file=sys.stderr)
@@ -59,10 +57,12 @@ def resolve_command(args: argparse.Namespace, context: UserContext) -> None:
     config = weaver.resolve_construct(args.construct_id, variables, context)
     print(config.model_dump_json(indent=2))
 
+
 def visualize_command(args: argparse.Namespace, context: UserContext) -> None:
     weaver = Weaver()
     result = weaver.visualize_construct(args.construct_id, context)
     print(json.dumps(result, indent=2))
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Coreason Construct CLI")
@@ -88,6 +88,7 @@ def main() -> None:
         resolve_command(args, context)
     elif args.command == "visualize":
         visualize_command(args, context)
+
 
 if __name__ == "__main__":  # pragma: no cover
     main()

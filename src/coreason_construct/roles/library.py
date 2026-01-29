@@ -71,6 +71,7 @@ ROLE_REGISTRY["MedicalDirector"] = MedicalDirector
 ROLE_REGISTRY["Biostatistician"] = Biostatistician
 ROLE_REGISTRY["SafetyScientist"] = SafetyScientist
 
+
 class RoleLibrary:
     @staticmethod
     def register_role(name: str, role: RoleDefinition, context: UserContext) -> None:
