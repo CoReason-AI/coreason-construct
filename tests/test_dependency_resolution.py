@@ -19,7 +19,7 @@ from coreason_construct.roles.library import Biostatistician, MedicalDirector
 from coreason_construct.weaver import Weaver
 
 
-def test_weaver_auto_dependency_medical_director(mock_context) -> None:
+def test_weaver_auto_dependency_medical_director(mock_context: UserContext) -> None:
     """Test that adding MedicalDirector automatically injects HIPAA context."""
     weaver = Weaver()
     weaver.add(MedicalDirector, context=mock_context)
@@ -29,7 +29,7 @@ def test_weaver_auto_dependency_medical_director(mock_context) -> None:
     assert has_hipaa, "HIPAA context should be automatically injected for MedicalDirector"
 
 
-def test_weaver_no_dependency_biostatistician(mock_context) -> None:
+def test_weaver_no_dependency_biostatistician(mock_context: UserContext) -> None:
     """Test that adding Biostatistician does NOT inject HIPAA (unless configured)."""
     weaver = Weaver()
     weaver.add(Biostatistician, context=mock_context)
@@ -39,7 +39,7 @@ def test_weaver_no_dependency_biostatistician(mock_context) -> None:
     assert not has_hipaa, "HIPAA context should NOT be injected for Biostatistician"
 
 
-def test_weaver_avoid_duplicate_dependencies(mock_context) -> None:
+def test_weaver_avoid_duplicate_dependencies(mock_context: UserContext) -> None:
     """Test that dependency is not added twice if explicitly added."""
     weaver = Weaver()
     weaver.add(HIPAA_Context, context=mock_context)
