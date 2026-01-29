@@ -9,7 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 from enum import Enum
-from typing import Dict, Optional, Type
+from typing import Dict, List, Optional, Type
 
 from jinja2 import StrictUndefined, Template
 from pydantic import BaseModel, Field
@@ -75,3 +75,4 @@ class PromptConfiguration(BaseModel):
     response_model: Optional[Type[BaseModel]]
     max_retries: int = Field(default=3, ge=0)
     provenance_metadata: Dict[str, str]
+    dropped_components: List[str] = Field(default_factory=list)

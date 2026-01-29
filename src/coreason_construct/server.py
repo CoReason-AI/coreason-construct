@@ -83,7 +83,9 @@ class ConstructServer:
         encoding = tiktoken.get_encoding("cl100k_base")
         token_count = len(encoding.encode(config.system_message))
 
-        return CompilationResponse(system_prompt=config.system_message, token_count=token_count, warnings=[])
+        return CompilationResponse(
+            system_prompt=config.system_message, token_count=token_count, warnings=config.dropped_components
+        )
 
 
 server = ConstructServer()
