@@ -10,6 +10,8 @@
 
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
+from coreason_identity.models import UserContext
+
 from coreason_construct.weaver import Weaver
 
 

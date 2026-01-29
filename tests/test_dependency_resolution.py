@@ -13,6 +13,8 @@ from typing import Any
 from pytest import CaptureFixture
 
 from coreason_construct.contexts.library import HIPAA_Context
+from coreason_identity.models import UserContext
+
 from coreason_construct.roles.library import Biostatistician, MedicalDirector
 from coreason_construct.weaver import Weaver
 

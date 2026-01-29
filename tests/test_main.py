@@ -47,8 +47,11 @@ def test_resolve_command(cli_context: UserContext, capsys: pytest.CaptureFixture
     assert "system_message" in captured.out
 
 
-def test_resolve_command_with_vars(cli_context: UserContext, tmp_path: object, capsys: pytest.CaptureFixture[str]) -> None:
+def test_resolve_command_with_vars(
+    cli_context: UserContext, tmp_path: object, capsys: pytest.CaptureFixture[str]
+) -> None:
     from pathlib import Path
+
     assert isinstance(tmp_path, Path)
     p = tmp_path / "vars.json"
     p.write_text(json.dumps({"test": "val"}))

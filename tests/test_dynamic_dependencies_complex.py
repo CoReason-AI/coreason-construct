@@ -76,6 +76,9 @@ class TypeCheckComp(BaseDynamicComp):
             self.content += f" (Type: {type(count).__name__})"
 
 
+from coreason_identity.models import UserContext
+
+
 @pytest.fixture
 def registry_cleanup() -> Generator[None, None, None]:
     """Saves and restores the registry state."""
