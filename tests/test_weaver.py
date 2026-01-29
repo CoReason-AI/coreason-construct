@@ -8,6 +8,9 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+import pytest
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.library import GxP_Context
 from coreason_construct.primitives.summarize import SummarizationPrimitive
 from coreason_construct.roles.library import MedicalDirector
@@ -15,25 +18,25 @@ from coreason_construct.schemas.primitives import Summary
 from coreason_construct.weaver import Weaver
 
 
-def test_weaver_dependency_resolution() -> None:
+def test_weaver_dependency_resolution(mock_context: UserContext) -> None:
     """Test that MedicalDirector role triggers HIPAA context injection."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     component_names = [c.name for c in weaver.components]
     assert "MedicalDirector" in component_names
     assert "HIPAA" in component_names
 
 
-def test_weaver_build_flow() -> None:
+def test_weaver_build_flow(mock_context: UserContext) -> None:
     """Test the full build flow with multiple components."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
-    weaver.add(GxP_Context)
+    weaver.add(MedicalDirector, context=mock_context)
+    weaver.add(GxP_Context, context=mock_context)
     primitive = SummarizationPrimitive()
-    weaver.add(primitive)
+    weaver.add(primitive, context=mock_context)
 
-    config = weaver.build(user_input="Patient X has diabetes.", variables={})
+    config = weaver.build(user_input="Patient X has diabetes.", variables={}, context=mock_context)
 
     # Check System Message
     assert "You are a Medical Director" in config.system_message
@@ -53,13 +56,13 @@ def test_weaver_build_flow() -> None:
     assert config.provenance_metadata["schema"] == "Summary"
 
 
-def test_weaver_sorting() -> None:
+def test_weaver_sorting(mock_context: UserContext) -> None:
     """Test that components are sorted by priority."""
     weaver = Weaver()
 
     # Add in random order
-    weaver.add(GxP_Context)  # Priority 9
-    weaver.add(MedicalDirector)  # Priority 10
+    weaver.add(GxP_Context, context=mock_context)  # Priority 9
+    weaver.add(MedicalDirector, context=mock_context)  # Priority 10
 
     # HIPAA (Priority 10) is auto-added by MedicalDirector
 
@@ -88,14 +91,36 @@ def test_weaver_build_defaults() -> None:
     assert config.user_message == "Test input"
 
 
-def test_weaver_duplicate_add_early_exit() -> None:
+def test_weaver_duplicate_add_early_exit(mock_context: UserContext) -> None:
     """Test that adding the same component twice returns early."""
     weaver = Weaver()
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     initial_count = len(weaver.components)
 
     # Add again
-    weaver.add(MedicalDirector)
+    weaver.add(MedicalDirector, context=mock_context)
 
     assert len(weaver.components) == initial_count
+
+
+def test_weaver_missing_context_dependency_error() -> None:
+    """Test that resolving dependencies without context raises ValueError."""
+    weaver = Weaver()
+    with pytest.raises(ValueError, match="UserContext is required"):
+        weaver.add(MedicalDirector)
+
+
+def test_visualize_construct(mock_context: UserContext) -> None:
+    """Test visualize_construct logic and logging."""
+    weaver = Weaver()
+    weaver.add(MedicalDirector, context=mock_context)
+    result = weaver.visualize_construct("test_viz", context=mock_context)
+    assert result["construct_id"] == "test_viz"
+    assert len(result["components"]) >= 2  # Role + Dep
+
+
+def test_visualize_construct_error() -> None:
+    weaver = Weaver()
+    with pytest.raises(ValueError, match="UserContext is required"):
+        weaver.visualize_construct("test", context=None)
