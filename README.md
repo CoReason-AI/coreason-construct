@@ -19,6 +19,15 @@ It replaces ad-hoc prompt engineering with **Type-Driven Generation**. It integr
 
 However, structure alone is not enough. The package provides a strictly typed library of **Cognitive Components**—Roles, Contexts, Logic Primitives, and Data Banks—that are assembled by the **Weaver**. The Weaver not only enforces output schema but also manages **Dependency Resolution** (context injection) and **Token Optimization** before the request is sent.
 
+## Service Mode (New in v0.5.0)
+
+`coreason-construct` can now act as a **Prompt Compilation Microservice** (Service C). This service exposes endpoints to:
+
+*   **Compile (`/v1/compile`)**: Weave components into a final configuration, handling context injection and token optimization on the server side.
+*   **Optimize (`/v1/optimize`)**: Compress raw text using token-aware strategies (e.g., middle-out pruning).
+
+Refer to the [Usage Guide](docs/usage.md#microservice-usage) for API details.
+
 ## Functional Philosophy: The Assembler Pattern
 
 "Prompts are not written; they are assembled. Outputs are not strings; they are Objects."
@@ -95,7 +104,8 @@ print(config.system_message)
 
 For more detailed information, please refer to the documentation:
 
-*   [Usage Guide](docs/usage.md): Detailed explanation of components and the Weaver.
+*   [Usage Guide](docs/usage.md): Detailed explanation of components, the Weaver, and Microservice API.
+*   [Requirements](docs/requirements.md): Full list of dependencies for Library and Service modes.
 *   [Vignette](docs/vignette.md): A narrative example of using coreason-construct.
 *   [Product Requirements Document](docs/PRD.md): The full PRD for this library.
 
