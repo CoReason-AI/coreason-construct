@@ -10,14 +10,14 @@
 
 from unittest.mock import patch
 
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.library import HIPAA_Context
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.roles.library import SafetyScientist
 from coreason_construct.schemas.base import ComponentType
 from coreason_construct.weaver import Weaver
 
-
-from coreason_identity.models import UserContext
 
 def test_safety_scientist_deduplication(mock_context: UserContext) -> None:
     """

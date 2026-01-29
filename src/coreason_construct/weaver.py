@@ -12,12 +12,11 @@ import inspect
 from typing import Any, Dict, List, Optional, Type, Union
 
 import tiktoken
+from coreason_identity.models import UserContext
 from loguru import logger
 from pydantic import BaseModel
 
-from coreason_identity.models import UserContext
 from coreason_construct.contexts.library import ContextLibrary
-from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.primitives.base import StructuredPrimitive
 from coreason_construct.schemas.base import ComponentType, PromptComponent, PromptConfiguration
 

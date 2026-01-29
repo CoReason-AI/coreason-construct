@@ -1,12 +1,13 @@
-import pytest
+import json
 from argparse import Namespace
 from unittest.mock import patch
-from coreason_identity.models import UserContext, SecretStr
-from coreason_construct.main import create_command, resolve_command, visualize_command, get_cli_context, main
-from coreason_construct.schemas.base import PromptComponent, ComponentType
-import json
-import os
-import sys
+
+import pytest
+from coreason_identity.models import UserContext
+
+from coreason_construct.main import create_command, get_cli_context, main, resolve_command, visualize_command
+from coreason_construct.schemas.base import ComponentType, PromptComponent
+
 
 @pytest.fixture
 def cli_context() -> UserContext:

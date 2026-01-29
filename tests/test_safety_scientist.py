@@ -8,11 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from coreason_identity.models import UserContext
+
 from coreason_construct.roles.library import SafetyScientist
 from coreason_construct.weaver import Weaver
 
-
-from coreason_identity.models import UserContext
 
 def test_safety_scientist_dependency_injection(mock_context: UserContext) -> None:
     """

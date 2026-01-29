@@ -10,8 +10,9 @@
 
 from typing import Any
 
-from loguru import logger
 from coreason_identity.models import UserContext
+from loguru import logger
+
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 
 

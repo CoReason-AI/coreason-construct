@@ -8,13 +8,13 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
+from coreason_identity.models import UserContext
+
 from coreason_construct.data.library import AE_Examples
 from coreason_construct.roles.library import SafetyScientist
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
 
-
-from coreason_identity.models import UserContext
 
 def test_weaver_integration_ae_examples(mock_context: UserContext) -> None:
     """

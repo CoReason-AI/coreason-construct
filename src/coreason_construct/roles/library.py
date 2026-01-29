@@ -8,9 +8,11 @@
 #
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
-from typing import Any, Optional
-from loguru import logger
+from typing import Optional
+
 from coreason_identity.models import UserContext
+from loguru import logger
+
 from coreason_construct.roles.base import RoleDefinition
 from coreason_construct.roles.registry import ROLE_REGISTRY
 

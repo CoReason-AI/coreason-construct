@@ -9,6 +9,7 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 from typing import Dict
+
 from coreason_construct.roles.base import RoleDefinition
 
 ROLE_REGISTRY: Dict[str, RoleDefinition] = {}

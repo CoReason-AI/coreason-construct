@@ -13,8 +13,6 @@ from typing import Any, Generator, List, Optional
 import pytest
 from coreason_identity.models import UserContext
 
-from coreason_identity.models import UserContext
-
 from coreason_construct.contexts.registry import CONTEXT_REGISTRY
 from coreason_construct.schemas.base import ComponentType, PromptComponent
 from coreason_construct.weaver import Weaver
@@ -117,6 +115,7 @@ def test_partial_chain_failure(registry_cleanup: Any, capsys: Any, mock_context:
     Missing val_c. C should fail. A and B should succeed.
     """
     import sys
+
     from loguru import logger
 
     # Reconfigure logger to ensure we catch the output

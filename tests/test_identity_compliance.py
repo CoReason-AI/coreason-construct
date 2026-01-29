@@ -1,10 +1,12 @@
 import pytest
-from coreason_identity.models import UserContext, SecretStr
-from coreason_construct.weaver import Weaver
-from coreason_construct.schemas.base import PromptComponent, ComponentType
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.library import ContextLibrary
-from coreason_construct.roles.library import RoleLibrary, MedicalDirector
-from coreason_construct.server import server, BlueprintRequest, CompilationResponse
+from coreason_construct.roles.library import MedicalDirector, RoleLibrary
+from coreason_construct.schemas.base import ComponentType, PromptComponent
+from coreason_construct.server import BlueprintRequest, CompilationResponse, server
+from coreason_construct.weaver import Weaver
+
 
 @pytest.fixture
 def mock_context() -> UserContext:

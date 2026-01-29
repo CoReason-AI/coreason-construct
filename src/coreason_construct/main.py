@@ -11,11 +11,12 @@
 import argparse
 import json
 import sys
-from typing import List
 
-from coreason_identity.models import UserContext, SecretStr
-from coreason_construct.weaver import Weaver
+from coreason_identity.models import UserContext
+
 from coreason_construct.schemas.base import PromptComponent
+from coreason_construct.weaver import Weaver
+
 
 def get_cli_context() -> UserContext:
     return UserContext(

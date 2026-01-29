@@ -2,13 +2,13 @@ from typing import Any, Dict, List, Optional
 
 import jinja2
 import tiktoken
-from fastapi import FastAPI, HTTPException, Depends
+from coreason_identity.models import UserContext
+from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from tiktoken import Encoding
 
 from coreason_construct.schemas.base import PromptComponent
 from coreason_construct.weaver import Weaver
-from coreason_identity.models import UserContext, SecretStr
 
 app = FastAPI(title="Coreason Construct Compiler", version="1.0.0")
 

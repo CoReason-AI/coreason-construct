@@ -9,14 +9,14 @@
 # Source Code: https://github.com/CoReason-AI/coreason_construct
 
 import pytest
+from coreason_identity.models import UserContext
+
 from coreason_construct.contexts.library import GxP_Context
 from coreason_construct.primitives.summarize import SummarizationPrimitive
 from coreason_construct.roles.library import MedicalDirector
 from coreason_construct.schemas.primitives import Summary
 from coreason_construct.weaver import Weaver
 
-
-from coreason_identity.models import UserContext
 
 def test_weaver_dependency_resolution(mock_context: UserContext) -> None:
     """Test that MedicalDirector role triggers HIPAA context injection."""
