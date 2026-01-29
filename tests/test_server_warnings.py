@@ -1,7 +1,9 @@
 from fastapi.testclient import TestClient
+
 from coreason_construct.server import app
 
 client = TestClient(app)
+
 
 def test_compile_returns_dropped_components_as_warnings() -> None:
     # 1. Create a request with low priority components that exceed max_tokens
@@ -17,20 +19,10 @@ def test_compile_returns_dropped_components_as_warnings() -> None:
         "user_input": "Input",
         "variables": {},
         "components": [
-            {
-                "name": "HighPriority",
-                "type": "CONTEXT",
-                "content": "Important " * 10,
-                "priority": 10
-            },
-            {
-                "name": "LowPriority",
-                "type": "CONTEXT",
-                "content": "Optional " * 50,
-                "priority": 1
-            }
+            {"name": "HighPriority", "type": "CONTEXT", "content": "Important " * 10, "priority": 10},
+            {"name": "LowPriority", "type": "CONTEXT", "content": "Optional " * 50, "priority": 1},
         ],
-        "max_tokens": 50
+        "max_tokens": 50,
     }
 
     response = client.post("/v1/compile", json=payload)
@@ -46,19 +38,13 @@ def test_compile_returns_dropped_components_as_warnings() -> None:
     assert "Important" in data["system_prompt"]
     assert "Optional" not in data["system_prompt"]
 
+
 def test_compile_no_warnings_when_limit_ok() -> None:
     payload = {
         "user_input": "Input",
         "variables": {},
-        "components": [
-            {
-                "name": "HighPriority",
-                "type": "CONTEXT",
-                "content": "Important",
-                "priority": 10
-            }
-        ],
-        "max_tokens": 1000
+        "components": [{"name": "HighPriority", "type": "CONTEXT", "content": "Important", "priority": 10}],
+        "max_tokens": 1000,
     }
 
     response = client.post("/v1/compile", json=payload)
