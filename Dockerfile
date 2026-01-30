@@ -9,6 +9,10 @@ WORKDIR /app
 RUN useradd -m appuser
 
 # Copy project files
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+
+# Copy project files
 COPY pyproject.toml README.md ./
 COPY src ./src
 
@@ -18,6 +22,8 @@ RUN pip install --no-cache-dir .
 # Create tiktoken cache directory and set permissions
 RUN mkdir -p $TIKTOKEN_CACHE_DIR && \
     chown -R appuser:appuser $TIKTOKEN_CACHE_DIR
+
+RUN chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser
