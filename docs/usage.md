@@ -142,3 +142,71 @@ response = client.chat.completions.create(
 print(response.term) # "headache"
 print(response.severity) # "mild"
 ```
+
+## Microservice Usage
+
+`coreason-construct` can now be deployed as a standalone **Prompt Compilation Microservice**. This offloads component assembly, dependency resolution, and token optimization to a centralized service.
+
+### API Endpoints
+
+#### 1. Compile Prompt (`POST /v1/compile`)
+
+Weaves raw components into a final, optimized configuration.
+
+**Request:**
+
+```json
+{
+  "user_input": "Patient reported nausea.",
+  "variables": {"study_id": "CT-123"},
+  "components": [
+    {
+      "name": "SafetyScientist",
+      "type": "ROLE",
+      "content": "You are a Safety Scientist...",
+      "priority": 10
+    },
+    {
+      "name": "BackgroundContext",
+      "type": "CONTEXT",
+      "content": "Protocol Details...",
+      "priority": 1
+    }
+  ],
+  "max_tokens": 100
+}
+```
+
+**Response:**
+
+```json
+{
+  "system_prompt": "You are a Safety Scientist...",
+  "token_count": 85,
+  "warnings": ["BackgroundContext"]
+}
+```
+
+*Note: `warnings` lists components dropped due to `max_tokens` constraints.*
+
+#### 2. Optimize Text (`POST /v1/optimize`)
+
+Truncates a text block to a specific token limit using a "Middle-Out" strategy (preserving start and end).
+
+**Request:**
+
+```json
+{
+  "text": "Long chat history...",
+  "limit": 100,
+  "strategy": "prune_middle"
+}
+```
+
+**Response:**
+
+```json
+{
+  "text": "Long chat...[snip]...history end."
+}
+```

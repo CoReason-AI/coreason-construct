@@ -211,6 +211,7 @@ class Weaver:
 
         # 2. Optimization Logic
         active_components = list(self.components)
+        dropped_components_list: List[str] = []
 
         while True:
             # Re-sort/Filter active components
@@ -251,6 +252,7 @@ class Weaver:
                 f"Dropping component '{to_remove.name}' (Priority: {to_remove.priority})."
             )
             active_components.remove(to_remove)
+            dropped_components_list.append(to_remove.name)
 
             if not active_components:
                 break
@@ -276,4 +278,5 @@ class Weaver:
             user_message=final_user_msg,
             response_model=self._response_model,
             provenance_metadata=metadata,
+            dropped_components=dropped_components_list,
         )
